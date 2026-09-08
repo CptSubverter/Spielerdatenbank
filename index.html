@@ -19,20 +19,24 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 function textOf(v){
  if(v==null) return '';
  if(typeof v==='string'||typeof v==='number') return String(v);
+ if(Array.isArray(v)) return v.map(textOf).filter(Boolean).join(' ');
  if(typeof v==='object'){
   for(const k of ['name','code','short','abbr','abbreviation','lv','verband','club','verein','value','id']){
-   if(v[k]!=null && (typeof v[k]==='string'||typeof v[k]==='number')) return String(v[k]);
+   if(v[k]!=null){ const t=textOf(v[k]); if(t) return t; }
   }
  }
  return '';
 }
+
 function unique(a){return [...new Set(a.map(textOf).map(s=>s.trim()).filter(Boolean))].sort((x,y)=>x.localeCompare(y,'de'))}
 function validLV(v){
  const s=textOf(v).trim();
  return /^[A-Za-zÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß _-]{1,20}$/.test(s) ? s : '';
 }
 function setupFilters(){
- f1.innerHTML='<option value="">Alle Vereine</option>'+clubNames.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+ f1.innerHTML='';
+ const first=document.createElement('option'); first.value=''; first.textContent='Alle Vereine'; f1.appendChild(first);
+ clubNames.forEach(x=>{ const o=document.createElement('option'); const t=textOf(x); o.value=t; o.textContent=t; f1.appendChild(o); });
  f2.innerHTML='<option value="">Alle Jahre</option>'+unique(players.flatMap(p=>(p.history||[]).map(h=>String(h.date||'').slice(0,4)))).sort().reverse().map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
 }
 function setMode(m){mode=m;profile.style.display='none';q.value='';letters.innerHTML='';
