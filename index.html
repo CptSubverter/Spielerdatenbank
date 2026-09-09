@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bahnengolf.net – Datenbank V11.8</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bahnengolf.net – Datenbank V11.12</title>
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,Arial;margin:0;color:#173042;background:#f5f9fc}.wrap{max-width:1250px;margin:auto;padding:12px}.head{background:linear-gradient(135deg,#1687d9,#72c7fb);color:white;padding:20px;border-radius:14px}.head h1{margin:0 0 5px}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.tabs button{border:1px solid #cfe3ef;background:#fff;border-radius:9px;padding:10px 14px;font-size:15px;font-weight:650;cursor:pointer}.tabs button.active{background:#1687d9;color:#fff;border-color:#1687d9}.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin:10px 0}.controls input,.controls select{padding:12px;border:1px solid #cfe3ef;border-radius:9px;font-size:16px;background:#fff}.letters{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}.letters button{border:1px solid #cfe3ef;background:white;border-radius:7px;padding:7px 10px;cursor:pointer}.stats{margin:10px 0}.table{overflow:auto;background:white;border:1px solid #d8eaf5;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:720px}th{background:#1687d9;color:#fff;text-align:left;padding:9px}td{padding:8px;border-bottom:1px solid #edf3f7}tr:hover td{background:#f7fbfe}.linkbtn{border:0;background:none;color:#087fc9;font-weight:650;cursor:pointer;padding:0;text-align:left}.profile{display:none;background:white;border:1px solid #d8eaf5;border-radius:10px;padding:16px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.card{background:#f7fbfe;border:1px solid #d8eaf5;border-radius:8px;padding:9px}.hist{overflow:auto;max-height:420px}.hint{background:#eef8ff;border:1px solid #cfeaf9;border-radius:9px;padding:10px;margin:10px 0}.sortbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.sortbar button{border:1px solid #cfe3ef;background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer}.sortbar button.active{background:#1687d9;color:#fff}.tmeta{font-size:14px;color:#496273;margin:8px 0 12px}.chart{overflow:auto;background:#fff;border:1px solid #d8eaf5;border-radius:9px;padding:8px}.chart svg{display:block;min-width:620px;width:100%;height:230px}.axis{font-size:11px;fill:#496273}.statbox{background:#f7fbfe;border:1px solid #d8eaf5;border-radius:8px;padding:9px}.small{font-size:12px;color:#496273}@media(max-width:700px){.controls{grid-template-columns:1fr}.wrap{padding:8px}}
 </style></head>
 <body><div class="wrap">
 <div class="head"><h1>🏆 Bahnengolf.net</h1><div>Spieler · Vereine · Verbände · Turniere</div><small id="dbstand"></small></div>
-<div class="tabs" id="tabs"><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button><button id="qualityBtn" type="button">🧪 Datenprüfung</button></div>
+<div class="tabs" id="tabs"><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button><button id="qualityBtn" type="button">✔ Datenprüfung</button></div>
 <div class="hint" id="hint"></div>
 <div class="controls"><input id="q" placeholder="🔎 Suche …"><select id="filter1"></select><select id="filter2"></select></div>
 <div class="letters" id="letters"></div><div class="stats"><b id="count">0</b> Treffer · <span id="total">0</span> Einträge</div>
@@ -43,36 +43,74 @@ function showClub(name){let ps=players.filter(p=>norm(p.club)===norm(name));prof
 function showLv(name){let cs=clubs.filter(c=>norm(c.lv)===norm(name));profile.style.display='block';profile.innerHTML=`<h2>🌐 ${esc(name)}</h2><p><b>Vereine:</b> ${cs.length} · <b>Spieler:</b> ${players.filter(p=>norm(p.lv)===norm(name)).length}</p><div class="hist">${cs.sort((a,b)=>a.name.localeCompare(b.name,'de')).map(c=>`<div><button class="linkbtn" data-club="${encodeURIComponent(c.name)}">${esc(c.name)}</button> · ${c.players} Spieler</div>`).join('')}</div>`;profile.scrollIntoView({behavior:'smooth',block:'start'})}
 function showTournament(name){let ps=[],seen=new Set();players.forEach((p,i)=>(p.tournaments||[]).forEach(t=>{if(t.code===name&&!seen.has(p.pass)){seen.add(p.pass);ps.push({p,i,v:t.value,rank:t.rank??t.place??t.position??''})}}));const clubsSet=unique(ps.map(x=>x.p.club));const lvSet=unique(ps.map(x=>x.p.lv));const year=String(name).slice(0,4);function renderParticipants(){let arr=ps.slice();if(tournamentSort==='name')arr.sort((a,b)=>a.p.name.localeCompare(b.p.name,'de'));if(tournamentSort==='club')arr.sort((a,b)=>a.p.club.localeCompare(b.p.club,'de')||a.p.name.localeCompare(b.p.name,'de'));if(tournamentSort==='value')arr.sort((a,b)=>(Number(a.v)||Infinity)-(Number(b.v)||Infinity));if(tournamentSort==='rank')arr.sort((a,b)=>(Number(a.rank)||99999)-(Number(b.rank)||99999));return arr.map(x=>`<tr><td>${x.rank!==''?esc(x.rank):'–'}</td><td><button class="linkbtn" data-player="${x.i}">${esc(x.p.name)}</button></td><td>${esc(x.p.club)}</td><td>${esc(x.p.lv)}</td><td>${fmt(x.v)}</td></tr>`).join('')||'<tr><td colspan="5">Keine Spielerdaten</td></tr>'}profile.style.display='block';profile.innerHTML=`<h2>🏆 ${esc(name)}</h2><div class="grid"><div class="card"><b>Turniercode</b><br>${esc(name)}</div><div class="card"><b>Jahr</b><br>${esc(year)}</div><div class="card"><b>Teilnehmer</b><br>${ps.length}</div><div class="card"><b>Vereine</b><br>${clubsSet.length}</div><div class="card"><b>Verbände</b><br>${lvSet.length}</div></div><div class="tmeta"><b>Vereine:</b> ${clubsSet.map(esc).join(', ')||'–'}<br><b>Verbände:</b> ${lvSet.map(esc).join(', ')||'–'}</div><div class="sortbar"><button class="${tournamentSort==='rank'?'active':''}" data-tsort="rank">Platz</button><button class="${tournamentSort==='name'?'active':''}" data-tsort="name">Name</button><button class="${tournamentSort==='club'?'active':''}" data-tsort="club">Verein</button><button class="${tournamentSort==='value'?'active':''}" data-tsort="value">Ergebnis</button></div><div class="table"><table><thead><tr><th>Platz</th><th>Spieler</th><th>Verein</th><th>LV</th><th>Ergebnis</th></tr></thead><tbody id="tournamentRows">${renderParticipants()}</tbody></table></div>`;profile.querySelectorAll('[data-tsort]').forEach(b=>b.onclick=()=>{tournamentSort=b.dataset.tsort;const body=profile.querySelector('#tournamentRows');if(body)body.innerHTML=renderParticipants();profile.querySelectorAll('[data-tsort]').forEach(x=>x.classList.toggle('active',x.dataset.tsort===tournamentSort))});profile.scrollIntoView({behavior:'smooth',block:'start'})}
 Promise.all(Array.from({length:8},(_,i)=>fetch(`data/players-${String(i+1).padStart(2,'0')}.json?cache=${Date.now()}`).then(r=>{if(!r.ok)throw new Error('Shard '+(i+1)+' fehlt');return r.json()}))).then(parts=>{players=parts.flat().map(p=>{p.pass=textOf(p.pass);p.name=textOf(p.name);p.club=textOf(p.club);p.lv=validLV(p.lv);p.class=textOf(p.class);return p});clubNames=unique(players.map(p=>p.club));clubs=clubNames.map(name=>{const ps=players.filter(p=>norm(p.club)===norm(name));const lv=ps.map(p=>validLV(p.lv)).find(Boolean)||'';return{name,lv,players:ps.length}});lvs=unique(clubs.map(c=>c.lv));let tm=new Map();players.forEach(p=>(p.tournaments||[]).forEach(t=>{if(!tm.has(t.code))tm.set(t.code,{name:t.code,year:String(t.code).slice(0,4),players:0});tm.get(t.code).players++}));tournaments=[...tm.values()].sort((a,b)=>a.name.localeCompare(b.name,'de'));setMode('players');fetch('indexes.json').then(r=>r.json()).then(x=>{if(x.stats)dbstand.textContent=` · Datenabgleich: ${x.stats.players.toLocaleString('de-DE')} Spieler · ${x.stats.tournaments.toLocaleString('de-DE')} Turniere · Stand 30.06.2026`}).catch(()=>{})}).catch(e=>{hint.textContent='Daten konnten nicht geladen werden. Bitte prüfen, ob alle Dateien im GitHub-Ordner vorhanden sind.'});
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));[q,f1,f2].forEach(x=>x.addEventListener('input',render));rows.addEventListener('click',e=>{let b=e.target.closest('[data-player],[data-club],[data-lv],[data-tournament]');if(!b)return;if(b.dataset.player!=null)showPlayer(Number(b.dataset.player));if(b.dataset.club!=null)showClub(decodeURIComponent(b.dataset.club));if(b.dataset.lv!=null)showLv(decodeURIComponent(b.dataset.lv));if(b.dataset.tournament!=null)showTournament(decodeURIComponent(b.dataset.tournament))});profile.addEventListener('click',e=>{let b=e.target.closest('[data-player],[data-club],[data-lv],[data-tournament]');if(!b)return;if(b.dataset.player!=null)showPlayer(Number(b.dataset.player));if(b.dataset.club!=null)showClub(decodeURIComponent(b.dataset.club));if(b.dataset.lv!=null)showLv(decodeURIComponent(b.dataset.lv));if(b.dataset.tournament!=null)showTournament(decodeURIComponent(b.dataset.tournament))});
+document.querySelectorAll('.tabs button[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));[q,f1,f2].forEach(x=>x.addEventListener('input',render));rows.addEventListener('click',e=>{let b=e.target.closest('[data-player],[data-club],[data-lv],[data-tournament]');if(!b)return;if(b.dataset.player!=null)showPlayer(Number(b.dataset.player));if(b.dataset.club!=null)showClub(decodeURIComponent(b.dataset.club));if(b.dataset.lv!=null)showLv(decodeURIComponent(b.dataset.lv));if(b.dataset.tournament!=null)showTournament(decodeURIComponent(b.dataset.tournament))});profile.addEventListener('click',e=>{let b=e.target.closest('[data-player],[data-club],[data-lv],[data-tournament]');if(!b)return;if(b.dataset.player!=null)showPlayer(Number(b.dataset.player));if(b.dataset.club!=null)showClub(decodeURIComponent(b.dataset.club));if(b.dataset.lv!=null)showLv(decodeURIComponent(b.dataset.lv));if(b.dataset.tournament!=null)showTournament(decodeURIComponent(b.dataset.tournament))});
 </script>
 <script>
 (function(){
   const btn=document.getElementById('qualityBtn');
   if(!btn)return;
+  const hobby=p=>norm(p.club)==='minigolfcard';
+  const hist=p=>Array.isArray(p.history)&&p.history.length>0;
+  const tourn=p=>Array.isArray(p.tournaments)&&p.tournaments.length>0;
+  const pb=p=>`<button type="button" class="linkbtn" data-player="${players.indexOf(p)}">${esc(p.name||'–')}</button>`;
+  const tbl=(heads,body,empty)=>body?`<div class="table"><table><thead><tr>${heads.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`:`<div class="hint">${empty||'Keine Einträge.'}</div>`;
   btn.addEventListener('click',function(){
-    const seen=new Set(), dup=[];
-    players.forEach(p=>{const key=String(p.pass||'').trim(); if(key){if(seen.has(key))dup.push(key); else seen.add(key);}});
-    const badLV=players.filter(p=>p.lv && !validLV(p.lv)).length;
-    const missingPass=players.filter(p=>!String(p.pass||'').trim()).length;
-    const missingName=players.filter(p=>!String(p.name||'').trim()).length;
-    const missingClub=players.filter(p=>!String(p.club||'').trim()).length;
-    const noHistory=players.filter(p=>!(p.history&&p.history.length)).length;
-    const noTournaments=players.filter(p=>!(p.tournaments&&p.tournaments.length)).length;
+    const seen=new Map(),dups=[];
+    players.forEach(p=>{let k=String(p.pass||'').trim();if(k){if(seen.has(k))dups.push({k,a:seen.get(k),b:p});else seen.set(k,p)}});
+    const badLV=players.filter(p=>{let v=String(p.lv||'').trim();return v&&!/^[A-Za-zÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß _-]{1,20}$/.test(v)});
+    const missPass=players.filter(p=>!String(p.pass||'').trim());
+    const missName=players.filter(p=>!String(p.name||'').trim());
+    const missClub=players.filter(p=>!String(p.club||'').trim());
+    const noHist=players.filter(p=>!hist(p)), noHistH=noHist.filter(hobby), noHistN=noHist.filter(p=>!hobby(p));
+    const noT=players.filter(p=>!tourn(p)), noTH=noT.filter(hobby), noTN=noT.filter(p=>!hobby(p));
+    const groups=new Map();
+    players.forEach(p=>{let raw=String(p.club||'').trim();if(!raw)return;let k=norm(raw).replace(/[\s\-_.']/g,'');if(!groups.has(k))groups.set(k,new Map());groups.get(k).set(norm(raw),raw)});
+    const variants=[];groups.forEach(v=>{if(v.size>1)variants.push([...v.values()].sort((a,b)=>a.localeCompare(b,'de')))});
+    const suspicious=[];
+    players.forEach(p=>{let r=[];let pass=String(p.pass||'').trim(),name=String(p.name||'').trim();if(pass&&!/^\d+$/.test(pass))r.push('Spielernummer nicht numerisch');if(name&&!name.includes(','))r.push('Namensformat prüfen');if(p.rank!==null&&p.rank!==undefined&&p.rank!==''&&(!Number.isFinite(Number(p.rank))||Number(p.rank)<=0))r.push('DRL-Platz auffällig');if(p.value!==null&&p.value!==undefined&&p.value!==''&&!Number.isFinite(Number(p.value)))r.push('DRL-Wert auffällig');if(r.length)suspicious.push({p,r})});
+    const malformed=[];players.forEach(p=>{if(!tourn(p))return;let n=(p.tournaments||[]).filter(t=>!String(t&&t.code||'').trim()).length;if(n)malformed.push({p,n})});
+    const lvStats=lvs.map(lv=>({lv,c:clubs.filter(x=>norm(x.lv)===norm(lv)).length,p:players.filter(x=>norm(x.lv)===norm(lv)).length,h:players.filter(x=>norm(x.lv)===norm(lv)&&hobby(x)).length}));
+    const clubStats=clubs.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).map(c=>{let ps=players.filter(p=>norm(p.club)===norm(c.name));return {n:c.name,lv:unique(ps.map(p=>p.lv)).join(', '),p:ps.length,a:ps.filter(p=>p.current!==false).length,h:ps.filter(hobby).length}});
+    const tech=dups.length+badLV.length+missPass.length+missName.length+missClub.length+suspicious.length+malformed.length;
     profile.style.display='block';
-    profile.innerHTML='<h2>🧪 Datenprüfung</h2><div class="grid">'+
-      '<div class="card"><b>Spieler</b><br>'+players.length.toLocaleString('de-DE')+'</div>'+
-      '<div class="card"><b>Doppelte Spielernummern</b><br>'+dup.length+'</div>'+
-      '<div class="card"><b>Ungültige LV</b><br>'+badLV+'</div>'+
-      '<div class="card"><b>Fehlende Spielernummer</b><br>'+missingPass+'</div>'+
-      '<div class="card"><b>Fehlender Name</b><br>'+missingName+'</div>'+
-      '<div class="card"><b>Fehlender Verein</b><br>'+missingClub+'</div>'+
-      '<div class="card"><b>Ohne DRL-Historie</b><br>'+noHistory+'</div>'+
-      '<div class="card"><b>Ohne Turnierdaten</b><br>'+noTournaments+'</div>'+
-      '</div>'+
-      '<h3>⚠️ Spieler ohne DRL-Historie</h3>'+
-      (noHistory ? '<div class="table"><table><thead><tr><th>Name</th><th>Spielernummer</th><th>Verein</th><th>LV</th><th>Status</th></tr></thead><tbody>'+
-        players.map((p,i)=>({p,i})).filter(x=>!(x.p.history&&x.p.history.length)).map(x=>'<tr><td><button type="button" class="linkbtn" data-player="'+x.i+'">'+esc(x.p.name||'–')+'</button></td><td>'+esc(x.p.pass||'–')+'</td><td>'+esc(x.p.club||'–')+'</td><td>'+esc(x.p.lv||'–')+'</td><td>'+ (x.p.current===false ? 'historisch/inaktiv' : 'aktuell') +'</td></tr>').join('')+'</tbody></table></div>' : '<div class="hint">Keine Spieler ohne DRL-Historie.</div>')+
-      '<p class="small">Die Datenprüfung verändert keine Daten. Bestehende Funktionen bleiben unverändert.</p>';
+    profile.innerHTML=`<h2>✔ Datenprüfung</h2>
+      <div class="hint"><b>Ergebnis:</b> ${tech===0?'🟢 Keine technischen Fehler gefunden.':'🔴 '+tech+' technische Auffälligkeiten gefunden.'}<br><span class="small">Hobbyspieler = Verein <b>MinigolfCard</b>. Hobbyspieler ohne DRL-Historie werden nicht als Fehler gewertet. Die Prüfung verändert keine Daten.</span></div>
+      <h3>📊 Gesamtprüfung</h3><div class="grid">
+      <div class="card"><b>Spieler</b><br>${players.length.toLocaleString('de-DE')}</div>
+      <div class="card"><b>Doppelte Spielernummern</b><br>${dups.length}</div>
+      <div class="card"><b>Ungültige LV</b><br>${badLV.length}</div>
+      <div class="card"><b>Fehlende Spielernummer</b><br>${missPass.length}</div>
+      <div class="card"><b>Fehlender Name</b><br>${missName.length}</div>
+      <div class="card"><b>Fehlender Verein</b><br>${missClub.length}</div>
+      <div class="card"><b>Ohne DRL-Historie<br><span class="small">ohne Hobbyspieler</span></b><br>${noHistN.length}</div>
+      <div class="card"><b>Hobbyspieler ohne DRL</b><br>${noHistH.length}</div>
+      <div class="card"><b>Ohne Turnierdaten</b><br>${noT.length}</div>
+      <div class="card"><b>Ohne Turnierdaten<br><span class="small">ohne Hobbyspieler</span></b><br>${noTN.length}</div>
+      <div class="card"><b>Hobbyspieler ohne Turniere</b><br>${noTH.length}</div>
+      <div class="card"><b>Vereins-Schreibweisen</b><br>${variants.length}</div>
+      <div class="card"><b>Spieler-Datenauffälligkeiten</b><br>${suspicious.length}</div>
+      <div class="card"><b>Turnier-Datensätze auffällig</b><br>${malformed.length}</div></div>
+      <h3>👤 Spieler ohne DRL-Historie – ohne Hobbyspieler</h3>
+      ${tbl(['Name','Spielernummer','Verein','LV','Status'],noHistN.map(p=>`<tr><td>${pb(p)}</td><td>${esc(p.pass||'–')}</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td><td>${p.current===false?'historisch/inaktiv':'aktuell'}</td></tr>`).join(''),'Keine Nicht-Hobbyspieler ohne DRL-Historie.')}
+      <h3>🏌️ Hobbyspieler ohne DRL-Historie</h3>
+      ${tbl(['Name','Spielernummer','Verein','LV','Status'],noHistH.map(p=>`<tr><td>${pb(p)}</td><td>${esc(p.pass||'–')}</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td><td>${p.current===false?'historisch/inaktiv':'aktuell'}</td></tr>`).join(''),'Keine Hobbyspieler ohne DRL-Historie.')}
+      <h3>⚠️ Doppelte Spielernummern</h3>
+      ${tbl(['Spielernummer','Spieler A','Spieler B'],dups.map(x=>`<tr><td>${esc(x.k)}</td><td>${pb(x.a)}</td><td>${pb(x.b)}</td></tr>`).join(''),'Keine doppelten Spielernummern.')}
+      <h3>⚠️ Ungültige / auffällige LV</h3>
+      ${tbl(['Name','Spielernummer','Verein','LV'],badLV.map(p=>`<tr><td>${pb(p)}</td><td>${esc(p.pass||'–')}</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td></tr>`).join(''),'Keine ungültigen LV.')}
+      <h3>⚠️ Fehlende Stammdaten</h3>
+      ${tbl(['Name','Spielernummer','Verein','LV','Hinweis'],[...missPass.map(p=>`<tr><td>${pb(p)}</td><td>–</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td><td>Spielernummer fehlt</td></tr>`),...missName.map(p=>`<tr><td>–</td><td>${esc(p.pass||'–')}</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td><td>Name fehlt</td></tr>`),...missClub.map(p=>`<tr><td>${pb(p)}</td><td>${esc(p.pass||'–')}</td><td>–</td><td>${esc(p.lv||'–')}</td><td>Verein fehlt</td></tr>`)].join(''),'Keine fehlenden Stammdaten.')}
+      <h3>🔎 Spieler-Datenqualität</h3>
+      ${tbl(['Name','Spielernummer','Verein','Auffälligkeit'],suspicious.map(x=>`<tr><td>${pb(x.p)}</td><td>${esc(x.p.pass||'–')}</td><td>${esc(x.p.club||'–')}</td><td>${esc(x.r.join(', '))}</td></tr>`).join(''),'Keine auffälligen Spieler-Datensätze.')}
+      <h3>🏟️ Vereine – Übersicht</h3>
+      ${tbl(['Verein','LV','Spieler','Aktuell','Hobbyspieler'],clubStats.map(x=>`<tr><td>${esc(x.n)}</td><td>${esc(x.lv||'–')}</td><td>${x.p}</td><td>${x.a}</td><td>${x.h}</td></tr>`).join(''))}
+      <h3>✏️ Mögliche unterschiedliche Schreibweisen von Vereinen</h3>
+      ${tbl(['Mögliche Varianten','Spieler gesamt'],variants.map(v=>{let n=v.reduce((z,s)=>z+players.filter(p=>p.club===s).length,0);return `<tr><td>${v.map(esc).join(' · ')}</td><td>${n}</td></tr>`}).join(''),'Keine möglichen Schreibvarianten gefunden.')}
+      <h3>🌐 Verbände – Übersicht</h3>
+      ${tbl(['Verband','Vereine','Spieler','Hobbyspieler'],lvStats.map(x=>`<tr><td>${esc(x.lv)}</td><td>${x.c}</td><td>${x.p}</td><td>${x.h}</td></tr>`).join(''),'Keine Verbandsdaten vorhanden.')}
+      <h3>🏆 Turnierdaten – Prüfung</h3>
+      ${tbl(['Name','Spielernummer','Verein','Fehlende Turniercodes'],malformed.map(x=>`<tr><td>${pb(x.p)}</td><td>${esc(x.p.pass||'–')}</td><td>${esc(x.p.club||'–')}</td><td>${x.n}</td></tr>`).join(''),'Keine fehlerhaften Turniercodes gefunden.')}
+      <p class="small">V11.12 · Rein lesende Prüfung. Es werden keine Daten automatisch geändert.</p>`;
     profile.scrollIntoView({behavior:'smooth',block:'start'});
   });
 })();
