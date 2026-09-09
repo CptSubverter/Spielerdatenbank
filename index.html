@@ -113,7 +113,7 @@ rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDash
     if(dup.length){dupHtml=`<h3>Doppelte Spielernummern (${dup.length})</h3><div class="hist">${dup.slice(0,100).map(([k,a])=>`<div><b>${escQ(k)}</b>: ${a.map(playerBtn).join(' · ')}</div>`).join('')}</div>`}else dupHtml='<h3>Doppelte Spielernummern</h3><div class="hint">Keine Auffälligkeiten.</div>';
     const box=document.getElementById('profile');
     box.style.display='block';
-    box.innerHTML=`<h2>🧪 Datenprüfung V11.20</h2>
+    box.innerHTML=`<h2>🧪 Datenprüfung V11.21</h2>
       <p>Die Prüfung liest die geladenen Daten nur aus und verändert weder Spieler noch JSON-Dateien.</p>
       <div class="grid">
         ${card('Spieler',players.length.toLocaleString('de-DE'))}
@@ -132,7 +132,7 @@ rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDash
       ${listBlock('Fehlender Name',noName)}
       ${listBlock('Fehlender Verein',noClub)}
       ${listBlock('Aktuell ohne LV',noLV)}
-      ${listBlock('Ohne DRL-Historie',noHistory)}
+      <h3>⚠️ Spieler ohne DRL-Historie (${noHistory.length})</h3>${noHistory.length?`<div class="hint"><b>Diese ${noHistory.length} Spieler haben aktuell keine historischen DRL-Datensätze.</b> Bitte Profil öffnen und prüfen, ob sie als alte/neu hinzugekommene Spieler korrekt sind.</div><div class="hist">${noHistory.map(x=>`<div style="padding:7px 0;border-bottom:1px solid #edf3f7">${playerBtn(x)} · <b>Nr.:</b> ${escQ(x.p.pass||'–')} · <b>Verein:</b> ${escQ(x.p.club||'–')} · <b>LV:</b> ${escQ(x.p.lv||'–')} · <b>Status:</b> ${x.p.current===false?'historisch/inaktiv':'aktuell'}</div>`).join('')}</div>`:`<div class="hint">Keine Spieler ohne DRL-Historie.</div>`}
       ${listBlock('Ungültige Turnierstruktur',badTours)}
       <h3>🏆 Turnierprüfung</h3><div class="hint">Erfasste Turniere: ${tournamentMap.size.toLocaleString('de-DE')} · Turniere ohne Teilnehmer: ${noTournamentParticipants.length}</div>
       <p class="small">Klick auf einen Spieler öffnet direkt dessen Profil.</p>`;
