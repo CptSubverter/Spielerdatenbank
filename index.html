@@ -154,4 +154,24 @@ document.addEventListener('click',function(e){
   showPlayer(i);
 },true);
 </script>
+
+<script>
+// V11.21.3 – robuste Spieler-Navigation im Capture-Modus
+window.openPlayerByIndex=function(i){
+  i=Number(i);
+  if(!Number.isInteger(i) || i<0 || i>=players.length) return;
+  try{ showPlayer(i); }catch(err){
+    const box=document.getElementById('profile');
+    box.style.display='block';
+    box.innerHTML='<div class="hint"><b>Fehler beim Öffnen des Spielers:</b><br>'+esc(String(err&&err.message||err))+'</div>';
+  }
+};
+window.addEventListener('click',function(e){
+  const b=e.target.closest && e.target.closest('button[data-player]');
+  if(!b) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  window.openPlayerByIndex(b.getAttribute('data-player'));
+},true);
+</script>
 </body></html>
