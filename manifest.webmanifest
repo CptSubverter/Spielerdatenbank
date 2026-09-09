@@ -1,0 +1,13 @@
+{
+  "name": "Bahnengolf.net – Spielerdatenbank",
+  "short_name": "Bahnengolf",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f9fc",
+  "theme_color": "#1687d9",
+  "description": "Bahnengolf.net Spielerdatenbank",
+  "icons": [
+    {"src":"apple-touch-icon.png","sizes":"180x180","type":"image/png","purpose":"any maskable"}
+  ]
+}
