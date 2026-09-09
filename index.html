@@ -5,7 +5,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Arial;margin:0;color:#173042;b
 </style></head>
 <body><div class="wrap">
 <div class="head"><h1>🏆 Bahnengolf.net</h1><div>Spieler · Vereine · Verbände · Turniere</div><small id="dbstand"></small></div>
-<div class="tabs" id="tabs"><button data-mode="dashboard">📊 Übersicht</button><button data-mode="global">🔎 Gesamtsuche</button><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button></div>
+<div class="tabs" id="tabs"><button data-mode="dashboard">📊 Übersicht</button><button data-mode="quality">🧪 Datenprüfung</button><button data-mode="global">🔎 Gesamtsuche</button><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button></div>
 <div class="hint" id="hint"></div>
 <div class="controls"><input id="q" placeholder="🔎 Suche …"><select id="filter1"></select><select id="filter2"></select></div>
 <div class="letters" id="letters"></div><div class="stats"><b id="count">0</b> Treffer · <span id="total">0</span> Einträge</div>
@@ -79,8 +79,35 @@ function showTournament(name){let ps=[],seen=new Set();players.forEach((p,i)=>(p
 function yearlyStats(){const m=new Map();players.forEach(p=>(p.history||[]).forEach(h=>{const y=String(h.date||'').slice(0,4);if(!/^\d{4}$/.test(y))return;let x=m.get(y)||{records:0,players:new Set(),clubs:new Set(),lvs:new Set()};x.records++;x.players.add(p.pass);if(h.club)x.clubs.add(h.club);if(h.lv)x.lvs.add(h.lv);m.set(y,x)}));return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([year,x])=>({year,records:x.records,players:x.players.size,clubs:x.clubs.size,lvs:x.lvs.size}))}
 function showDashboard(){const ys=yearlyStats();profile.style.display='block';profile.innerHTML=`<h2>📊 Datenbank-Übersicht</h2><div class="grid"><div class="card"><b>Spieler</b><br>${players.length.toLocaleString('de-DE')}</div><div class="card"><b>Vereine</b><br>${clubs.length.toLocaleString('de-DE')}</div><div class="card"><b>Verbände</b><br>${lvs.length}</div><div class="card"><b>Turniere</b><br>${tournaments.length.toLocaleString('de-DE')}</div><div class="card"><b>DRL-Historie</b><br>${players.reduce((n,p)=>n+(p.history||[]).length,0).toLocaleString('de-DE')}</div><div class="card"><b>Turnierdaten</b><br>${players.reduce((n,p)=>n+(p.tournaments||[]).length,0).toLocaleString('de-DE')}</div></div><h3>📅 Jahres-/Saisonübersicht</h3><div class="table"><table><thead><tr><th>Jahr</th><th>DRL-Datensätze</th><th>Spieler</th><th>Vereine</th><th>Verbände</th></tr></thead><tbody>${ys.map(x=>`<tr><td>${x.year}</td><td>${x.records.toLocaleString('de-DE')}</td><td>${x.players.toLocaleString('de-DE')}</td><td>${x.clubs.toLocaleString('de-DE')}</td><td>${x.lvs}</td></tr>`).join('')}</tbody></table></div>`;profile.scrollIntoView({behavior:'smooth',block:'start'})}
 
+// V11.19 – data quality
+function showDataQuality(){
+  const duplicatePasses=new Map();
+  players.forEach(p=>{const k=String(p.pass||'').trim();if(k){const a=duplicatePasses.get(k)||[];a.push(p);duplicatePasses.set(k,a)}});
+  const dupPlayers=[...duplicatePasses.entries()].filter(([,a])=>a.length>1);
+  const badLV=players.filter(p=>p.lv && !lvs.some(x=>norm(x)===norm(p.lv)));
+  const missingPass=players.filter(p=>!String(p.pass||'').trim());
+  const missingName=players.filter(p=>!String(p.name||'').trim());
+  const missingClub=players.filter(p=>!String(p.club||'').trim());
+  const orphanClubs=players.filter(p=>p.club && !clubs.some(c=>norm(c.name)===norm(p.club)));
+  const emptyTournamentParticipants=tournaments.filter(t=>!players.some(p=>(p.tournaments||[]).some(x=>x.code===t.name)));
+  const noHistory=players.filter(p=>!(p.history||[]).length);
+  const currentWithoutLV=players.filter(p=>p.current!==false && !String(p.lv||'').trim());
+  const issueTotal=dupPlayers.length+badLV.length+missingPass.length+missingName.length+missingClub.length+orphanClubs.length+emptyTournamentParticipants.length+currentWithoutLV.length;
+  const card=(label,n)=>`<div class="card"><b>${label}</b><br><span style="font-size:22px">${n.toLocaleString('de-DE')}</span></div>`;
+  const list=(title,arr,fmt)=>arr.length?`<h3>${title} (${arr.length})</h3><div class="hist">${arr.slice(0,100).map(fmt).join('')}${arr.length>100?'<div class="small">Weitere Treffer werden aus Platzgründen nicht angezeigt.</div>':''}</div>`:'';
+  profile.style.display='block';
+  profile.innerHTML=`<h2>🧪 Datenprüfung</h2><div class="hint">V11.19 prüft den aktuell geladenen Datenbestand. Die Daten werden dabei nicht verändert.</div>
+  <div class="grid">${card('Gesamtspieler',players.length)}${card('Doppelte Spielernummern',dupPlayers.length)}${card('Ungültige LV',badLV.length)}${card('Fehlende Spielernummer',missingPass.length)}${card('Fehlender Name',missingName.length)}${card('Fehlender Verein',missingClub.length)}${card('Verein nicht in Vereinsliste',orphanClubs.length)}${card('Turniere ohne Teilnehmer',emptyTournamentParticipants.length)}${card('Aktuelle Spieler ohne LV',currentWithoutLV.length)}${card('Spieler ohne DRL-Historie',noHistory.length)}</div>
+  <div class="hint"><b>Prüfergebnis:</b> ${issueTotal===0?'Keine strukturellen Auffälligkeiten gefunden.':'Es wurden '+issueTotal.toLocaleString('de-DE')+' Prüfpunkte gefunden.'}</div>
+  ${list('Doppelte Spielernummern',dupPlayers,([pass,a])=>`<div><b>${esc(pass)}</b>: ${a.map(p=>esc(p.name)).join(' · ')}</div>`)}
+  ${list('Ungültige LV',badLV,p=>`<div><b>${esc(p.name)}</b> · ${esc(p.pass)} · LV: ${esc(p.lv||'–')}</div>`)}
+  ${list('Vereine ohne passende Vereinsliste',orphanClubs,p=>`<div><b>${esc(p.name)}</b> · ${esc(p.pass)} · Verein: ${esc(p.club)}</div>`)}
+  ${list('Turniere ohne Teilnehmer',emptyTournamentParticipants,t=>`<div><b>${esc(t.name)}</b> · ${esc(t.year||'')}</div>`)}
+  ${list('Aktuelle Spieler ohne LV',currentWithoutLV,p=>`<div><b>${esc(p.name)}</b> · ${esc(p.pass)} · ${esc(p.club||'–')}</div>`)}`;
+  profile.scrollIntoView({behavior:'smooth',block:'start'});
+}
 // V11.18 – overview tab
 const _setModeV17=setMode;
-function setMode(m){if(m==='dashboard'){mode='dashboard';profile.style.display='none';q.value='';f1.style.display='none';f2.style.display='none';letters.innerHTML='';document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));hint.textContent='Gesamtübersicht der aktuell geladenen Bahnengolf-Datenbank.';thead.innerHTML='<tr><th>Übersicht</th></tr>';rows.innerHTML='<tr><td><button class="linkbtn" id="openDashboard">📊 Datenbank-Übersicht öffnen</button></td></tr>';count.textContent='';total.textContent='';showDashboard();return}_setModeV17(m)}
-rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDashboard()});
+function setMode(m){if(m==='quality'){mode='quality';profile.style.display='none';q.value='';f1.style.display='none';f2.style.display='none';letters.innerHTML='';document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));hint.textContent='Prüfung des aktuell geladenen Datenbestands.';thead.innerHTML='<tr><th>Datenprüfung</th></tr>';rows.innerHTML='<tr><td><button class="linkbtn" id="openQuality">🧪 Datenprüfung öffnen</button></td></tr>';count.textContent='';total.textContent='';showDataQuality();return}if(m==='dashboard'){mode='dashboard';profile.style.display='none';q.value='';f1.style.display='none';f2.style.display='none';letters.innerHTML='';document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));hint.textContent='Gesamtübersicht der aktuell geladenen Bahnengolf-Datenbank.';thead.innerHTML='<tr><th>Übersicht</th></tr>';rows.innerHTML='<tr><td><button class="linkbtn" id="openDashboard">📊 Datenbank-Übersicht öffnen</button></td></tr>';count.textContent='';total.textContent='';showDashboard();return}_setModeV17(m)}
+rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDashboard();if(e.target.closest('#openQuality'))showDataQuality()});
 </script></body></html>
