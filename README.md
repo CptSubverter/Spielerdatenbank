@@ -1,21 +1,30 @@
-# Bahnengolf.net – GitHub-Datenbank V4
+# Bahnengolf.net – GitHub-Datenbank
 
-Kompletter Datenbestand aus dem abgeglichenen Archiv. Die große Spielerdatei wurde für GitHub in 8 JSON-Dateien aufgeteilt, damit keine einzelne Datei das Upload-Limit überschreitet.
+Abgeglichene statische Datenbank für Bahnengolf.net. Die Daten wurden mit dem Archiv `Archiv(4).zip` abgeglichen und um die bereits vorhandenen Daten ergänzt.
 
-## Enthalten
+## Stand
 - 6.406 eindeutige Spieler
-- Spieler, Vereine, Verbände und Turniere
-- historische DRL-Daten
-- Turnierdaten
-- A–Z-Suche
-- Suche nach Name, Spielernummer, Verein und Verband
-- Vereins- und Verbandsübersichten
-- Turniersuche
+- 2.430 Spieler im aktuellen DRL-Datensatz vom 30.06.2026
+- 404 Vereine
+- 141 Verbände/Landesverbandskürzel
+- 6.139 unterschiedliche Turnierkennungen
+- 74 Ranglisten-/DRL-Datenstände
+- 208.955 historische Ranglisten-Datensätze
+- 227.619 erfasste Turnierergebnisse
+
+## Funktionen
+- Spielersuche nach Name, Spielernummer, Verein und Verband
+- Vereins-Suche und Vereins-Spielerliste
+- Verbands-Suche mit Vereinen und Spielerzahlen
+- Turnier-Suche nach Turniername/Ort/Jahr und Spielerlisten
+- A–Z-Navigation
+- DRL-Daten und historische Daten im Spielerprofil
+- responsive Darstellung für Smartphone und PC
 
 ## Dateien
-- `index.html` – Weboberfläche
-- `indexes.json` – Statistik/Index
-- `data/players-01.json` bis `players-08.json` – kompletter Spielerdatenbestand
-- `webador-embed.html` – Einbindung in Webador
+- `index.html` – Suchoberfläche
+- `data.json` – vollständiger Datenbestand
+- `indexes.json` – Such-/Statistikindex
+- `webador-embed.html` – Einbettung für Webador
 
-Alle 8 Datendateien müssen im Ordner `data/` liegen.
+Die Oberfläche lädt die Daten direkt aus demselben GitHub-Pages-Verzeichnis.
