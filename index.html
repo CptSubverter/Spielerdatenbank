@@ -28,10 +28,13 @@ function textOf(v){
  return '';
 }
 
-function unique(a){return [...new Set(a.map(textOf).map(s=>s.trim()).filter(Boolean))].sort((x,y)=>x.localeCompare(y,'de'))}
-function validLV(v){
- const s=textOf(v).trim();
- return /^[A-Za-zÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß _-]{1,20}$/.test(s) ? s : '';
+const VALID_LVS=['NBV','BMV','MVBN','HBSV','WBV','BBS','MRP','BVBB','SHMV','HBV','SaarMV','BVSA','BVS'];
+function unique(a){const m=new Map();for(const v of a){const s=textOf(v).trim();if(!s)continue;const k=norm(s);if(!m.has(k)||s.length>m.get(k).length)m.set(k,s)}return [...m.values()].sort((x,y)=>x.localeCompare(y,'de'))}
+function validLV(v){const s=textOf(v).trim();return VALID_LVS.includes(s)?s:'';}
+function canonicalize(players){
+ const pref=new Map();
+ for(const p of players){const s=textOf(p.club).trim();if(!s)continue;const k=norm(s);const score=p.current===true?100000:0;if(!pref.has(k)||score>pref.get(k).score||(score===pref.get(k).score&&s.length>pref.get(k).name.length))pref.set(k,{name:s,score});}
+ for(const p of players){const k=norm(p.club);if(pref.has(k))p.club=pref.get(k).name;const direct=validLV(p.lv);if(direct)p.lv=direct;else if(VALID_LVS.includes(p.club))p.lv=p.club;else p.lv='';}
 }
 function setupFilters(){
  f1.innerHTML='';
@@ -67,7 +70,8 @@ function showClub(name){let ps=players.filter(p=>p.club===name);profile.style.di
 function showLv(name){let cs=clubs.filter(c=>c.lv===name);profile.style.display='block';profile.innerHTML=`<h2>🌐 ${esc(name)}</h2><p><b>Vereine:</b> ${cs.length} · <b>Spieler:</b> ${players.filter(p=>p.lv===name).length}</p><div class="hist">${cs.sort((a,b)=>a.name.localeCompare(b.name,'de')).map(c=>`<div><button class="linkbtn" data-club="${encodeURIComponent(c.name)}">${esc(c.name)}</button> · ${c.players} Spieler</div>`).join('')}</div>`;profile.scrollIntoView({behavior:'smooth',block:'start'})}
 function showTournament(name){let ps=[],seen=new Set();players.forEach((p,i)=>(p.tournaments||[]).forEach(t=>{if(t.code===name&&!seen.has(p.pass)){seen.add(p.pass);ps.push({p,i,v:t.value})}}));profile.style.display='block';profile.innerHTML=`<h2>🏆 ${esc(name)}</h2><p><b>Erfasste Spieler:</b> ${ps.length}</p><div class="hist">${ps.sort((a,b)=>a.p.name.localeCompare(b.p.name,'de')).map(x=>`<div><button class="linkbtn" data-player="${x.i}">${esc(x.p.name)}</button> · ${esc(x.p.club)} · ${Number(x.v).toFixed(3).replace('.',',')}</div>`).join('')||'Keine Spielerdaten'}</div>`;profile.scrollIntoView({behavior:'smooth',block:'start'})}
 Promise.all(Array.from({length:8},(_,i)=>fetch(`data/players-${String(i+1).padStart(2,'0')}.json?cache=${Date.now()}`).then(r=>{if(!r.ok)throw new Error('Shard '+i+' fehlt');return r.json()}))).then(parts=>{
- players=parts.flat().map(p=>{p.pass=textOf(p.pass);p.name=textOf(p.name);p.club=textOf(p.club);p.lv=validLV(p.lv);p.class=textOf(p.class);return p;});
+ players=parts.flat().map(p=>{p.pass=textOf(p.pass);p.name=textOf(p.name);p.club=textOf(p.club);p.lv=textOf(p.lv);p.class=textOf(p.class);return p;});
+ canonicalize(players);
  clubNames=unique(players.map(p=>p.club));
  clubs=clubNames.map(name=>{const ps=players.filter(p=>p.club===name);const lv=ps.map(p=>validLV(p.lv)).find(Boolean)||'';return {name,lv,players:ps.length};});
  lvs=unique(clubs.map(c=>c.lv));
