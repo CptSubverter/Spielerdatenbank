@@ -5,7 +5,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Arial;margin:0;color:#173042;b
 </style></head>
 <body><div class="wrap">
 <div class="head"><h1>🏆 Bahnengolf.net</h1><div>Spieler · Vereine · Verbände · Turniere</div><small id="dbstand"></small></div>
-<div class="tabs" id="tabs"><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button><button id="qualityBtn" type="button">✔ Datenprüfung</button></div>
+<div class="tabs" id="tabs"><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button><button id="qualityBtn" type="button">🔍 Datenprüfung</button></div>
 <div class="hint" id="hint"></div>
 <div class="controls"><input id="q" placeholder="🔎 Suche …"><select id="filter1"></select><select id="filter2"></select></div>
 <div class="letters" id="letters"></div><div class="stats"><b id="count">0</b> Treffer · <span id="total">0</span> Einträge</div>
@@ -49,7 +49,7 @@ document.querySelectorAll('.tabs button[data-mode]').forEach(b=>b.onclick=()=>se
 (function(){
   const btn=document.getElementById('qualityBtn');
   if(!btn)return;
-  const hobby=p=>norm(p.club)==='minigolfcard';
+  const hobby=p=>norm(String(p.club||'').trim())==='minigolfcard';
   const hist=p=>Array.isArray(p.history)&&p.history.length>0;
   const tourn=p=>Array.isArray(p.tournaments)&&p.tournaments.length>0;
   const pb=p=>`<button type="button" class="linkbtn" data-player="${players.indexOf(p)}">${esc(p.name||'–')}</button>`;
@@ -61,8 +61,8 @@ document.querySelectorAll('.tabs button[data-mode]').forEach(b=>b.onclick=()=>se
     const missPass=players.filter(p=>!String(p.pass||'').trim());
     const missName=players.filter(p=>!String(p.name||'').trim());
     const missClub=players.filter(p=>!String(p.club||'').trim());
-    const noHist=players.filter(p=>!hist(p)), noHistH=noHist.filter(hobby), noHistN=noHist.filter(p=>!hobby(p));
-    const noT=players.filter(p=>!tourn(p)), noTH=noT.filter(hobby), noTN=noT.filter(p=>!hobby(p));
+    const noHistAll=players.filter(p=>!hist(p)), noHistN=noHistAll.filter(p=>!hobby(p));
+    const noTAll=players.filter(p=>!tourn(p)), noTN=noTAll.filter(p=>!hobby(p));
     const groups=new Map();
     players.forEach(p=>{let raw=String(p.club||'').trim();if(!raw)return;let k=norm(raw).replace(/[\s\-_.']/g,'');if(!groups.has(k))groups.set(k,new Map());groups.get(k).set(norm(raw),raw)});
     const variants=[];groups.forEach(v=>{if(v.size>1)variants.push([...v.values()].sort((a,b)=>a.localeCompare(b,'de')))});
@@ -73,8 +73,8 @@ document.querySelectorAll('.tabs button[data-mode]').forEach(b=>b.onclick=()=>se
     const clubStats=clubs.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).map(c=>{let ps=players.filter(p=>norm(p.club)===norm(c.name));return {n:c.name,lv:unique(ps.map(p=>p.lv)).join(', '),p:ps.length,a:ps.filter(p=>p.current!==false).length,h:ps.filter(hobby).length}});
     const tech=dups.length+badLV.length+missPass.length+missName.length+missClub.length+suspicious.length+malformed.length;
     profile.style.display='block';
-    profile.innerHTML=`<h2>✔ Datenprüfung</h2>
-      <div class="hint"><b>Ergebnis:</b> ${tech===0?'🟢 Keine technischen Fehler gefunden.':'🔴 '+tech+' technische Auffälligkeiten gefunden.'}<br><span class="small">Hobbyspieler = Verein <b>MinigolfCard</b>. Hobbyspieler ohne DRL-Historie werden nicht als Fehler gewertet. Die Prüfung verändert keine Daten.</span></div>
+    profile.innerHTML=`<h2>🔍 Datenprüfung</h2>
+      <div class="hint"><b>Ergebnis:</b> ${tech===0?'🟢 Keine technischen Fehler gefunden.':'🔴 '+tech+' technische Auffälligkeiten gefunden.'}<br><span class="small">Hobbyspieler = Verein <b>MinigolfCard</b>. Hobbyspieler (Verein <b>MinigolfCard</b>) werden bei DRL- und Turnierprüfungen nicht als Fehler gewertet. Die Prüfung verändert keine Daten.</span></div>
       <h3>📊 Gesamtprüfung</h3><div class="grid">
       <div class="card"><b>Spieler</b><br>${players.length.toLocaleString('de-DE')}</div>
       <div class="card"><b>Doppelte Spielernummern</b><br>${dups.length}</div>
@@ -83,17 +83,13 @@ document.querySelectorAll('.tabs button[data-mode]').forEach(b=>b.onclick=()=>se
       <div class="card"><b>Fehlender Name</b><br>${missName.length}</div>
       <div class="card"><b>Fehlender Verein</b><br>${missClub.length}</div>
       <div class="card"><b>Ohne DRL-Historie<br><span class="small">ohne Hobbyspieler</span></b><br>${noHistN.length}</div>
-      <div class="card"><b>Hobbyspieler ohne DRL</b><br>${noHistH.length}</div>
-      <div class="card"><b>Ohne Turnierdaten</b><br>${noT.length}</div>
       <div class="card"><b>Ohne Turnierdaten<br><span class="small">ohne Hobbyspieler</span></b><br>${noTN.length}</div>
-      <div class="card"><b>Hobbyspieler ohne Turniere</b><br>${noTH.length}</div>
+      
       <div class="card"><b>Vereins-Schreibweisen</b><br>${variants.length}</div>
       <div class="card"><b>Spieler-Datenauffälligkeiten</b><br>${suspicious.length}</div>
       <div class="card"><b>Turnier-Datensätze auffällig</b><br>${malformed.length}</div></div>
       <h3>👤 Spieler ohne DRL-Historie – ohne Hobbyspieler</h3>
       ${tbl(['Name','Spielernummer','Verein','LV','Status'],noHistN.map(p=>`<tr><td>${pb(p)}</td><td>${esc(p.pass||'–')}</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td><td>${p.current===false?'historisch/inaktiv':'aktuell'}</td></tr>`).join(''),'Keine Nicht-Hobbyspieler ohne DRL-Historie.')}
-      <h3>🏌️ Hobbyspieler ohne DRL-Historie</h3>
-      ${tbl(['Name','Spielernummer','Verein','LV','Status'],noHistH.map(p=>`<tr><td>${pb(p)}</td><td>${esc(p.pass||'–')}</td><td>${esc(p.club||'–')}</td><td>${esc(p.lv||'–')}</td><td>${p.current===false?'historisch/inaktiv':'aktuell'}</td></tr>`).join(''),'Keine Hobbyspieler ohne DRL-Historie.')}
       <h3>⚠️ Doppelte Spielernummern</h3>
       ${tbl(['Spielernummer','Spieler A','Spieler B'],dups.map(x=>`<tr><td>${esc(x.k)}</td><td>${pb(x.a)}</td><td>${pb(x.b)}</td></tr>`).join(''),'Keine doppelten Spielernummern.')}
       <h3>⚠️ Ungültige / auffällige LV</h3>
