@@ -137,6 +137,7 @@ rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDash
       <h3>🏆 Turnierprüfung</h3><div class="hint">Erfasste Turniere: ${tournamentMap.size.toLocaleString('de-DE')} · Turniere ohne Teilnehmer: ${noTournamentParticipants.length}</div>
       <p class="small">Klick auf einen Spieler öffnet direkt dessen Profil.</p>`;
     box.scrollIntoView({behavior:'smooth',block:'start'});
+    box.querySelectorAll('[data-player]').forEach(btn=>{btn.onclick=ev=>{ev.preventDefault();ev.stopPropagation();showPlayer(Number(btn.dataset.player));};});
   }
   document.getElementById('qualityBtn').addEventListener('click',quality);
 })();
