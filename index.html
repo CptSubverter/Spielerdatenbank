@@ -5,7 +5,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Arial;margin:0;color:#173042;b
 </style></head>
 <body><div class="wrap">
 <div class="head"><h1>🏆 Bahnengolf.net</h1><div>Spieler · Vereine · Verbände · Turniere</div><small id="dbstand"></small></div>
-<div class="tabs" id="tabs"><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button></div>
+<div class="tabs" id="tabs"><button data-mode="players" class="active">👤 Spieler</button><button data-mode="clubs">🏟️ Vereine</button><button data-mode="lvs">🌐 Verbände</button><button data-mode="tournaments">🏆 Turniere</button><button id="qualityBtn" type="button">🧪 Datenprüfung</button></div>
 <div class="hint" id="hint"></div>
 <div class="controls"><input id="q" placeholder="🔎 Suche …"><select id="filter1"></select><select id="filter2"></select></div>
 <div class="letters" id="letters"></div><div class="stats"><b id="count">0</b> Treffer · <span id="total">0</span> Einträge</div>
@@ -44,4 +44,33 @@ function showLv(name){let cs=clubs.filter(c=>norm(c.lv)===norm(name));profile.st
 function showTournament(name){let ps=[],seen=new Set();players.forEach((p,i)=>(p.tournaments||[]).forEach(t=>{if(t.code===name&&!seen.has(p.pass)){seen.add(p.pass);ps.push({p,i,v:t.value,rank:t.rank??t.place??t.position??''})}}));const clubsSet=unique(ps.map(x=>x.p.club));const lvSet=unique(ps.map(x=>x.p.lv));const year=String(name).slice(0,4);function renderParticipants(){let arr=ps.slice();if(tournamentSort==='name')arr.sort((a,b)=>a.p.name.localeCompare(b.p.name,'de'));if(tournamentSort==='club')arr.sort((a,b)=>a.p.club.localeCompare(b.p.club,'de')||a.p.name.localeCompare(b.p.name,'de'));if(tournamentSort==='value')arr.sort((a,b)=>(Number(a.v)||Infinity)-(Number(b.v)||Infinity));if(tournamentSort==='rank')arr.sort((a,b)=>(Number(a.rank)||99999)-(Number(b.rank)||99999));return arr.map(x=>`<tr><td>${x.rank!==''?esc(x.rank):'–'}</td><td><button class="linkbtn" data-player="${x.i}">${esc(x.p.name)}</button></td><td>${esc(x.p.club)}</td><td>${esc(x.p.lv)}</td><td>${fmt(x.v)}</td></tr>`).join('')||'<tr><td colspan="5">Keine Spielerdaten</td></tr>'}profile.style.display='block';profile.innerHTML=`<h2>🏆 ${esc(name)}</h2><div class="grid"><div class="card"><b>Turniercode</b><br>${esc(name)}</div><div class="card"><b>Jahr</b><br>${esc(year)}</div><div class="card"><b>Teilnehmer</b><br>${ps.length}</div><div class="card"><b>Vereine</b><br>${clubsSet.length}</div><div class="card"><b>Verbände</b><br>${lvSet.length}</div></div><div class="tmeta"><b>Vereine:</b> ${clubsSet.map(esc).join(', ')||'–'}<br><b>Verbände:</b> ${lvSet.map(esc).join(', ')||'–'}</div><div class="sortbar"><button class="${tournamentSort==='rank'?'active':''}" data-tsort="rank">Platz</button><button class="${tournamentSort==='name'?'active':''}" data-tsort="name">Name</button><button class="${tournamentSort==='club'?'active':''}" data-tsort="club">Verein</button><button class="${tournamentSort==='value'?'active':''}" data-tsort="value">Ergebnis</button></div><div class="table"><table><thead><tr><th>Platz</th><th>Spieler</th><th>Verein</th><th>LV</th><th>Ergebnis</th></tr></thead><tbody id="tournamentRows">${renderParticipants()}</tbody></table></div>`;profile.querySelectorAll('[data-tsort]').forEach(b=>b.onclick=()=>{tournamentSort=b.dataset.tsort;const body=profile.querySelector('#tournamentRows');if(body)body.innerHTML=renderParticipants();profile.querySelectorAll('[data-tsort]').forEach(x=>x.classList.toggle('active',x.dataset.tsort===tournamentSort))});profile.scrollIntoView({behavior:'smooth',block:'start'})}
 Promise.all(Array.from({length:8},(_,i)=>fetch(`data/players-${String(i+1).padStart(2,'0')}.json?cache=${Date.now()}`).then(r=>{if(!r.ok)throw new Error('Shard '+(i+1)+' fehlt');return r.json()}))).then(parts=>{players=parts.flat().map(p=>{p.pass=textOf(p.pass);p.name=textOf(p.name);p.club=textOf(p.club);p.lv=validLV(p.lv);p.class=textOf(p.class);return p});clubNames=unique(players.map(p=>p.club));clubs=clubNames.map(name=>{const ps=players.filter(p=>norm(p.club)===norm(name));const lv=ps.map(p=>validLV(p.lv)).find(Boolean)||'';return{name,lv,players:ps.length}});lvs=unique(clubs.map(c=>c.lv));let tm=new Map();players.forEach(p=>(p.tournaments||[]).forEach(t=>{if(!tm.has(t.code))tm.set(t.code,{name:t.code,year:String(t.code).slice(0,4),players:0});tm.get(t.code).players++}));tournaments=[...tm.values()].sort((a,b)=>a.name.localeCompare(b.name,'de'));setMode('players');fetch('indexes.json').then(r=>r.json()).then(x=>{if(x.stats)dbstand.textContent=` · Datenabgleich: ${x.stats.players.toLocaleString('de-DE')} Spieler · ${x.stats.tournaments.toLocaleString('de-DE')} Turniere · Stand 30.06.2026`}).catch(()=>{})}).catch(e=>{hint.textContent='Daten konnten nicht geladen werden. Bitte prüfen, ob alle Dateien im GitHub-Ordner vorhanden sind.'});
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));[q,f1,f2].forEach(x=>x.addEventListener('input',render));rows.addEventListener('click',e=>{let b=e.target.closest('[data-player],[data-club],[data-lv],[data-tournament]');if(!b)return;if(b.dataset.player!=null)showPlayer(Number(b.dataset.player));if(b.dataset.club!=null)showClub(decodeURIComponent(b.dataset.club));if(b.dataset.lv!=null)showLv(decodeURIComponent(b.dataset.lv));if(b.dataset.tournament!=null)showTournament(decodeURIComponent(b.dataset.tournament))});profile.addEventListener('click',e=>{let b=e.target.closest('[data-player],[data-club],[data-lv],[data-tournament]');if(!b)return;if(b.dataset.player!=null)showPlayer(Number(b.dataset.player));if(b.dataset.club!=null)showClub(decodeURIComponent(b.dataset.club));if(b.dataset.lv!=null)showLv(decodeURIComponent(b.dataset.lv));if(b.dataset.tournament!=null)showTournament(decodeURIComponent(b.dataset.tournament))});
-</script></body></html>
+</script>
+<script>
+(function(){
+  const btn=document.getElementById('qualityBtn');
+  if(!btn)return;
+  btn.addEventListener('click',function(){
+    const seen=new Set(), dup=[];
+    players.forEach(p=>{const key=String(p.pass||'').trim(); if(key){if(seen.has(key))dup.push(key); else seen.add(key);}});
+    const badLV=players.filter(p=>p.lv && !validLV(p.lv)).length;
+    const missingPass=players.filter(p=>!String(p.pass||'').trim()).length;
+    const missingName=players.filter(p=>!String(p.name||'').trim()).length;
+    const missingClub=players.filter(p=>!String(p.club||'').trim()).length;
+    const noHistory=players.filter(p=>!(p.history&&p.history.length)).length;
+    const noTournaments=players.filter(p=>!(p.tournaments&&p.tournaments.length)).length;
+    profile.style.display='block';
+    profile.innerHTML='<h2>🧪 Datenprüfung</h2><div class="grid">'+
+      '<div class="card"><b>Spieler</b><br>'+players.length.toLocaleString('de-DE')+'</div>'+
+      '<div class="card"><b>Doppelte Spielernummern</b><br>'+dup.length+'</div>'+
+      '<div class="card"><b>Ungültige LV</b><br>'+badLV+'</div>'+
+      '<div class="card"><b>Fehlende Spielernummer</b><br>'+missingPass+'</div>'+
+      '<div class="card"><b>Fehlender Name</b><br>'+missingName+'</div>'+
+      '<div class="card"><b>Fehlender Verein</b><br>'+missingClub+'</div>'+
+      '<div class="card"><b>Ohne DRL-Historie</b><br>'+noHistory+'</div>'+
+      '<div class="card"><b>Ohne Turnierdaten</b><br>'+noTournaments+'</div>'+
+      '</div><p class="small">Die Datenprüfung verändert keine Daten. Bestehende Funktionen bleiben unverändert.</p>';
+    profile.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+})();
+</script>
+</body></html>
