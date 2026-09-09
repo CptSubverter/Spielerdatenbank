@@ -113,7 +113,7 @@ rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDash
     if(dup.length){dupHtml=`<h3>Doppelte Spielernummern (${dup.length})</h3><div class="hist">${dup.slice(0,100).map(([k,a])=>`<div><b>${escQ(k)}</b>: ${a.map(playerBtn).join(' · ')}</div>`).join('')}</div>`}else dupHtml='<h3>Doppelte Spielernummern</h3><div class="hint">Keine Auffälligkeiten.</div>';
     const box=document.getElementById('profile');
     box.style.display='block';
-    box.innerHTML=`<h2>🧪 Datenprüfung V11.21</h2>
+    box.innerHTML=`<h2>🧪 Datenprüfung V11.21.2</h2>
       <p>Die Prüfung liest die geladenen Daten nur aus und verändert weder Spieler noch JSON-Dateien.</p>
       <div class="grid">
         ${card('Spieler',players.length.toLocaleString('de-DE'))}
@@ -141,5 +141,17 @@ rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDash
   }
   document.getElementById('qualityBtn').addEventListener('click',quality);
 })();
+
+// V11.21.2.2 – zentrale, robuste Spieler-Klickbehandlung
+// Fängt jeden [data-player]-Button unabhängig davon ab, wo er erzeugt wurde.
+document.addEventListener('click',function(e){
+  const b=e.target.closest && e.target.closest('[data-player]');
+  if(!b)return;
+  const i=Number(b.getAttribute('data-player'));
+  if(!Number.isInteger(i)||!players[i])return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  showPlayer(i);
+},true);
 </script>
 </body></html>
