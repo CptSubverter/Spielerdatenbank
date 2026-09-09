@@ -68,7 +68,11 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setMode(b.dat
       '<div class="card"><b>Fehlender Verein</b><br>'+missingClub+'</div>'+
       '<div class="card"><b>Ohne DRL-Historie</b><br>'+noHistory+'</div>'+
       '<div class="card"><b>Ohne Turnierdaten</b><br>'+noTournaments+'</div>'+
-      '</div><p class="small">Die Datenprüfung verändert keine Daten. Bestehende Funktionen bleiben unverändert.</p>';
+      '</div>'+
+      '<h3>⚠️ Spieler ohne DRL-Historie</h3>'+
+      (noHistory ? '<div class="table"><table><thead><tr><th>Name</th><th>Spielernummer</th><th>Verein</th><th>LV</th><th>Status</th></tr></thead><tbody>'+
+        players.map((p,i)=>({p,i})).filter(x=>!(x.p.history&&x.p.history.length)).map(x=>'<tr><td><button type="button" class="linkbtn" data-player="'+x.i+'">'+esc(x.p.name||'–')+'</button></td><td>'+esc(x.p.pass||'–')+'</td><td>'+esc(x.p.club||'–')+'</td><td>'+esc(x.p.lv||'–')+'</td><td>'+ (x.p.current===false ? 'historisch/inaktiv' : 'aktuell') +'</td></tr>').join('')+'</tbody></table></div>' : '<div class="hint">Keine Spieler ohne DRL-Historie.</div>')+
+      '<p class="small">Die Datenprüfung verändert keine Daten. Bestehende Funktionen bleiben unverändert.</p>';
     profile.scrollIntoView({behavior:'smooth',block:'start'});
   });
 })();
