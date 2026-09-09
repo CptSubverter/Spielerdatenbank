@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bahnengolf.net – Datenbank V11.18</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bahnengolf.net – Datenbank V11.20</title>
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,Arial;margin:0;color:#173042;background:#f5f9fc}.wrap{max-width:1250px;margin:auto;padding:12px}.head{background:linear-gradient(135deg,#1687d9,#72c7fb);color:white;padding:20px;border-radius:14px}.head h1{margin:0 0 5px}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.tabs button{border:1px solid #cfe3ef;background:#fff;border-radius:9px;padding:10px 14px;font-size:15px;font-weight:650;cursor:pointer}.tabs button.active{background:#1687d9;color:#fff;border-color:#1687d9}.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin:10px 0}.controls input,.controls select{padding:12px;border:1px solid #cfe3ef;border-radius:9px;font-size:16px;background:#fff}.letters{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}.letters button{border:1px solid #cfe3ef;background:white;border-radius:7px;padding:7px 10px;cursor:pointer}.stats{margin:10px 0}.table{overflow:auto;background:white;border:1px solid #d8eaf5;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:720px}th{background:#1687d9;color:#fff;text-align:left;padding:9px}td{padding:8px;border-bottom:1px solid #edf3f7}tr:hover td{background:#f7fbfe}.linkbtn{border:0;background:none;color:#087fc9;font-weight:650;cursor:pointer;padding:0;text-align:left}.profile{display:none;background:white;border:1px solid #d8eaf5;border-radius:10px;padding:16px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.card{background:#f7fbfe;border:1px solid #d8eaf5;border-radius:8px;padding:9px}.hist{overflow:auto;max-height:420px}.hint{background:#eef8ff;border:1px solid #cfeaf9;border-radius:9px;padding:10px;margin:10px 0}.sortbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.sortbar button{border:1px solid #cfe3ef;background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer}.sortbar button.active{background:#1687d9;color:#fff}.tmeta{font-size:14px;color:#496273;margin:8px 0 12px}.chart{overflow:auto;background:#fff;border:1px solid #d8eaf5;border-radius:9px;padding:8px}.chart svg{display:block;min-width:620px;width:100%;height:230px}.axis{font-size:11px;fill:#496273}.statbox{background:#f7fbfe;border:1px solid #d8eaf5;border-radius:8px;padding:9px}.small{font-size:12px;color:#496273}@media(max-width:700px){.controls{grid-template-columns:1fr}.wrap{padding:8px}}
 </style></head>
@@ -87,26 +87,55 @@ rows.addEventListener('click',e=>{if(e.target.closest('#openDashboard'))showDash
 <script>
 (function(){
   function quality(){
-    if(typeof players==='undefined'){alert('Daten sind noch nicht geladen.');return;}
-    const normQ=x=>String(x??'').trim().toLowerCase();
-    const seen=new Map(); players.forEach(p=>{let k=String(p.pass??'').trim();if(k){let a=seen.get(k)||[];a.push(p);seen.set(k,a)}});
-    const dup=[...seen.values()].filter(a=>a.length>1);
-    const badLV=players.filter(p=>p.lv && typeof lvs!=='undefined' && !lvs.some(x=>normQ(x)===normQ(p.lv)));
-    const noPass=players.filter(p=>!String(p.pass??'').trim()).length;
-    const noName=players.filter(p=>!String(p.name??'').trim()).length;
-    const noClub=players.filter(p=>!String(p.club??'').trim()).length;
-    const noHistory=players.filter(p=>!(p.history||[]).length).length;
+    if(!players.length){alert('Daten sind noch nicht geladen.');return;}
+    const nQ=x=>String(x??'').trim().toLowerCase();
+    const escQ=x=>esc(x);
+    const seen=new Map();
+    players.forEach((p,i)=>{const k=String(p.pass??'').trim();if(k){const a=seen.get(k)||[];a.push({p,i});seen.set(k,a)}});
+    const dup=[...seen.entries()].filter(([k,a])=>a.length>1);
+    const badLV=players.map((p,i)=>({p,i})).filter(x=>x.p.lv&&!lvs.some(v=>nQ(v)===nQ(x.p.lv)));
+    const noPass=players.map((p,i)=>({p,i})).filter(x=>!String(x.p.pass??'').trim());
+    const noName=players.map((p,i)=>({p,i})).filter(x=>!String(x.p.name??'').trim());
+    const noClub=players.map((p,i)=>({p,i})).filter(x=>!String(x.p.club??'').trim());
+    const noLV=players.map((p,i)=>({p,i})).filter(x=>x.p.current!==false&&!String(x.p.lv??'').trim());
+    const noHistory=players.map((p,i)=>({p,i})).filter(x=>!(x.p.history||[]).length);
+    const badTours=players.map((p,i)=>({p,i})).filter(x=>!Array.isArray(x.p.tournaments));
+    const tournamentMap=new Map();
+    players.forEach(p=>(p.tournaments||[]).forEach(t=>{const c=String(t&&t.code||'').trim();if(c)tournamentMap.set(c,(tournamentMap.get(c)||0)+1)}));
+    const noTournamentParticipants=[...tournamentMap.entries()].filter(([c,n])=>n===0);
+    const card=(title,value,cls='')=>`<div class="card ${cls}"><b>${title}</b><br><span style="font-size:22px">${value}</span></div>`;
+    const playerBtn=x=>`<button class="linkbtn" data-player="${x.i}">${escQ(x.p.name||x.p.pass||'Unbekannt')}</button>`;
+    const listBlock=(title,items,limit=100)=>{
+      if(!items.length)return `<h3>${title}</h3><div class="hint">Keine Auffälligkeiten.</div>`;
+      return `<h3>${title} (${items.length})</h3><div class="hist">${items.slice(0,limit).map(x=>`<div>${playerBtn(x)} · ${escQ(x.p.pass||'')} · ${escQ(x.p.club||'')} · ${escQ(x.p.lv||'')}</div>`).join('')}${items.length>limit?`<div class="small">Nur die ersten ${limit} werden angezeigt.</div>`:''}</div>`;
+    };
+    let dupHtml='';
+    if(dup.length){dupHtml=`<h3>Doppelte Spielernummern (${dup.length})</h3><div class="hist">${dup.slice(0,100).map(([k,a])=>`<div><b>${escQ(k)}</b>: ${a.map(playerBtn).join(' · ')}</div>`).join('')}</div>`}else dupHtml='<h3>Doppelte Spielernummern</h3><div class="hint">Keine Auffälligkeiten.</div>';
     const box=document.getElementById('profile');
     box.style.display='block';
-    box.innerHTML='<h2>🧪 Datenprüfung</h2><div class="grid">'+
-      '<div class="card"><b>Spieler</b><br>'+players.length.toLocaleString('de-DE')+'</div>'+
-      '<div class="card"><b>Doppelte Spielernummern</b><br>'+dup.length+'</div>'+
-      '<div class="card"><b>Ungültige LV</b><br>'+badLV.length+'</div>'+
-      '<div class="card"><b>Fehlende Spielernummer</b><br>'+noPass+'</div>'+
-      '<div class="card"><b>Fehlender Name</b><br>'+noName+'</div>'+
-      '<div class="card"><b>Fehlender Verein</b><br>'+noClub+'</div>'+
-      '<div class="card"><b>Ohne DRL-Historie</b><br>'+noHistory+'</div></div>'+
-      '<p><b>Die Prüfung verändert keine Daten.</b></p>';
+    box.innerHTML=`<h2>🧪 Datenprüfung V11.20</h2>
+      <p>Die Prüfung liest die geladenen Daten nur aus und verändert weder Spieler noch JSON-Dateien.</p>
+      <div class="grid">
+        ${card('Spieler',players.length.toLocaleString('de-DE'))}
+        ${card('Doppelte Spielernummern',dup.length)}
+        ${card('Ungültige LV',badLV.length)}
+        ${card('Fehlende Spielernummer',noPass.length)}
+        ${card('Fehlender Name',noName.length)}
+        ${card('Fehlender Verein',noClub.length)}
+        ${card('Aktuell ohne LV',noLV.length)}
+        ${card('Ohne DRL-Historie',noHistory.length)}
+        ${card('Ungültige Turnierstruktur',badTours.length)}
+      </div>
+      ${dupHtml}
+      ${listBlock('Ungültige LV',badLV)}
+      ${listBlock('Fehlende Spielernummer',noPass)}
+      ${listBlock('Fehlender Name',noName)}
+      ${listBlock('Fehlender Verein',noClub)}
+      ${listBlock('Aktuell ohne LV',noLV)}
+      ${listBlock('Ohne DRL-Historie',noHistory)}
+      ${listBlock('Ungültige Turnierstruktur',badTours)}
+      <h3>🏆 Turnierprüfung</h3><div class="hint">Erfasste Turniere: ${tournamentMap.size.toLocaleString('de-DE')} · Turniere ohne Teilnehmer: ${noTournamentParticipants.length}</div>
+      <p class="small">Klick auf einen Spieler öffnet direkt dessen Profil.</p>`;
     box.scrollIntoView({behavior:'smooth',block:'start'});
   }
   document.getElementById('qualityBtn').addEventListener('click',quality);
