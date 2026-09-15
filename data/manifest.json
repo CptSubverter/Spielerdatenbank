@@ -1,67 +1,13 @@
 {
-  "version": "2015-2025-split-v1",
-  "years": [
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
-    2022,
-    2023,
-    2024,
-    2025
-  ],
-  "excluded_years": [
-    2020,
-    2021,
-    2026
-  ],
-  "players": {
-    "files": [
-      "players-01.json",
-      "players-02.json",
-      "players-03.json",
-      "players-04.json",
-      "players-05.json",
-      "players-06.json",
-      "players-07.json",
-      "players-08.json"
-    ],
-    "records": 7564
-  },
-  "results": {
-    "files": [
-      "results-01.json",
-      "results-02.json",
-      "results-03.json",
-      "results-04.json",
-      "results-05.json",
-      "results-06.json",
-      "results-07.json",
-      "results-08.json"
-    ],
-    "records": 156744
-  },
-  "rounds": {
-    "files": [
-      "rounds-01.json",
-      "rounds-02.json",
-      "rounds-03.json",
-      "rounds-04.json"
-    ],
-    "records": 27501
-  },
-  "clubs": {
-    "file": "clubs.json",
-    "records": 960
-  },
-  "associations": {
-    "file": "associations.json",
-    "records": 13
-  },
-  "tournaments": {
-    "file": "tournaments.json",
-    "records": 6053
-  },
-  "duplicates_collapsed": 0
+  "version": "restart-2015-2025-v3",
+  "years": [2015, 2016, 2017, 2018, 2019, 2022, 2023, 2024, 2025],
+  "excluded_years": [2020, 2021, 2026],
+  "players": 7564,
+  "players_with_pass": 6438,
+  "players_without_pass": 1126,
+  "results": 156744,
+  "results_with_rounds": 27501,
+  "results_without_rounds": 129243,
+  "rounds": 27501,
+  "notes": "Getrennte Datenebenen: Spieler-Stammdaten, Teilnahmen/Ergebnisse und Einzelrunden. Teilnahmen ohne Einzelrunden bleiben erhalten. Offene Identitätsfälle werden nicht geraten."
 }
