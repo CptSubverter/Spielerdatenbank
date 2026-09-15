@@ -5,5 +5,5 @@
   "players": 8,
   "results": 8,
   "rounds": 4,
-  "notes": "Teststand: vollständige Spieler-Stammdaten bleiben erhalten; Teilnahmen/Ergebnisse und Einzelrunden sind getrennte Ebenen. Teilnahmen ohne Runden werden nicht entfernt."
+  "notes": "Teststand: Spieler-Stammdaten, Teilnahmen/Ergebnisse und Einzelrunden werden getrennt geführt. Teilnahmen ohne Runden bleiben erhalten. Offene Identitätsfälle werden nicht geraten."
 }
