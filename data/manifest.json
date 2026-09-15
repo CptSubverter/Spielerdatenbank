@@ -1,9 +1,13 @@
 {
-  "version": "restart-2015-2025-v2",
+  "version": "restart-2015-2025-v3",
   "years": [2015, 2016, 2017, 2018, 2019, 2022, 2023, 2024, 2025],
   "excluded_years": [2020, 2021, 2026],
-  "players": 8,
-  "results": 8,
-  "rounds": 4,
-  "notes": "Teststand: Spieler-Stammdaten, Teilnahmen/Ergebnisse und Einzelrunden werden getrennt geführt. Teilnahmen ohne Runden bleiben erhalten. Offene Identitätsfälle werden nicht geraten."
+  "players": 7564,
+  "players_with_pass": 6438,
+  "players_without_pass": 1126,
+  "results": 156744,
+  "results_with_rounds": 27501,
+  "results_without_rounds": 129243,
+  "rounds": 27501,
+  "notes": "Getrennte Datenebenen: Spieler-Stammdaten, Teilnahmen/Ergebnisse und Einzelrunden. Teilnahmen ohne Einzelrunden bleiben erhalten. Offene Identitätsfälle werden nicht geraten."
 }
