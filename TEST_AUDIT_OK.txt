@@ -1,0 +1,1 @@
+Der Neustart-Datenstand wurde geprüft. Diese Datei dient nur als Branch-Test und wird vor einem späteren Merge entfernt.
