@@ -1,0 +1,223 @@
+[
+  {
+    "association_id": "LV001",
+    "name": "BBS",
+    "player_count": 281,
+    "club_count": 71,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV002",
+    "name": "BMV",
+    "player_count": 806,
+    "club_count": 134,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV003",
+    "name": "BVBB",
+    "player_count": 168,
+    "club_count": 43,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV004",
+    "name": "BVS",
+    "player_count": 34,
+    "club_count": 12,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV005",
+    "name": "BVSA",
+    "player_count": 91,
+    "club_count": 32,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV006",
+    "name": "HBSV",
+    "player_count": 400,
+    "club_count": 75,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV007",
+    "name": "HBV",
+    "player_count": 146,
+    "club_count": 26,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV008",
+    "name": "MRP",
+    "player_count": 248,
+    "club_count": 62,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV009",
+    "name": "MVBN",
+    "player_count": 593,
+    "club_count": 79,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV010",
+    "name": "NBV",
+    "player_count": 1620,
+    "club_count": 295,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV011",
+    "name": "SaarMV",
+    "player_count": 109,
+    "club_count": 40,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV012",
+    "name": "SHMV",
+    "player_count": 152,
+    "club_count": 36,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  {
+    "association_id": "LV013",
+    "name": "WBV",
+    "player_count": 265,
+    "club_count": 75,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  }
+]
