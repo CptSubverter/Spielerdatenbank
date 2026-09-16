@@ -1,4 +1,4 @@
-# Relation builder v2: associations come from player master; result/player matching requires pass+name consistency.
+# Relation builder v2: player_key is authoritative when supplied; pass+name consistency is enforced.
 import json,re,os,glob,hashlib,unicodedata
 from collections import defaultdict
 ROOT='data';OUT=os.path.join(ROOT,'relations')
@@ -47,9 +47,14 @@ def adda(a,n,p=None,r=None,t=None,c=None):
 for p in PO:
  if p['lv']:adda(aid(p['lv']),p['lv'],p=p['id'])
 def resolve(z):
- explicit=str(first(z,('player_id','playerId','spieler_id','spielerId','person_id','personId')))
- if explicit in by_id:return explicit,'player_id'
- pas=str(first(z,('pass','passnummer','passNumber','card','cardNumber')));name=str(first(z,('playerName','player_name','spielerName','spieler_name','name','fullName','player','spieler','Name')));club=teamless(first(z,('club','verein','result_club','resultClub','Verein')))
+ explicit=str(first(z,('player_id','playerId','spieler_id','spielerId','person_id','personId','player_key','playerKey')))
+ name=str(first(z,('playerName','player_name','spielerName','spieler_name','name','fullName','player','spieler','Name')))
+ club=teamless(first(z,('club','verein','result_club','resultClub','Verein')))
+ if explicit in by_id:
+  p=explicit
+  if not name or norm(name)==norm(by_id[p]['name']):return p,'player_key_verified' if first(z,('player_key','playerKey')) else 'player_id'
+  return None,'player_key_name_conflict' if first(z,('player_key','playerKey')) else 'player_id_name_conflict'
+ pas=str(first(z,('pass','passnummer','passNumber','card','cardNumber')))
  if pas:
   s=by_pass.get(norm(pas),set())
   if len(s)==1:
@@ -58,7 +63,7 @@ def resolve(z):
    return None,'pass_name_conflict'
  if name and club:
   s=by_nc.get((norm(name),norm(club)),set())
-  if len(s)==1:return next(iter(s)),'name_unique_club_verified'
+  if len(s)==1:return next(iter(s),'name_unique_club_verified')
  s=by_name.get(norm(name),set()) if name else set()
  if len(s)==1:return next(iter(s)),'name_unique'
  return (None,'ambiguous' if len(s)>1 else 'unresolved')
