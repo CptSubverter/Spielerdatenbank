@@ -111,3 +111,4 @@ sc=defaultdict(int)
 for r in results:sc['results_'+r['match_status']]+=1
 for r in drl:sc['drl_'+r['match_status']]+=1
 json.dump({'version':'relations-v2','generated_at':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),'players':len(PO),'results':len(results),'tournaments':len(T),'clubs':len(C),'associations':len(A),'drl_records':len(drl),'result_chunks':len(rf),'drl_chunks':len(df),'match_status_counts':dict(sc),'files':{'players':'players.json','clubs':'clubs.json','associations':'associations.json','tournaments':'tournaments.json','result_chunks':rf,'drl_chunks':df}},open(os.path.join(OUT,'manifest.json'),'w',encoding='utf-8'),ensure_ascii=False,indent=2)
+# Full audit workflow is triggered by this file; no data-source values are modified here.
