@@ -1,0 +1,42 @@
+{
+  "status": "reconciliation_stage_1_complete",
+  "run_date": "2026-09-16",
+  "scope": [
+    "DMV_Datenbank_2015-2025.xlsx",
+    "DMV_DRL_Spieler_Datenbank_2015-2026.xlsx",
+    "Minigolf_Vereins_und_Spielerdatenbank_Archiv_ab_2013.html",
+    "Bahnengolf_Datenbank_V12_repariert.html"
+  ],
+  "rules": {
+    "pass": "highest",
+    "person_id": "second",
+    "name_context": "fallback",
+    "club_team_suffix": "ignored_for_identity_only",
+    "uncertain": "never_guess"
+  },
+  "counts": {
+    "players": 7270,
+    "results": 44291,
+    "tournaments": 1406,
+    "clubs": 1112,
+    "associations": 13,
+    "drl_rows": 111291,
+    "dmv_list_rows": 4037,
+    "unresolved_result_rows": 0,
+    "drl_unresolved": 1,
+    "dmv_unresolved": 0,
+    "player_pass_verified": 2488,
+    "player_pass_conflict": 0,
+    "event_source_rows": 1146,
+    "legacy_tournaments": 992,
+    "archive_players": 2475,
+    "archive_history_rows": 111226
+  },
+  "notes": [
+    "Tournament master starts from 1146 DMV event records and is extended by result-derived events.",
+    "DRL contains 75 workbook snapshot rows plus 111226 archive history rows.",
+    "All 44291 reconciled result rows received a player_id in this stage.",
+    "One DRL row remains unresolved and is intentionally not guessed.",
+    "Association values were filtered to plausible LV labels; numeric values are not treated as associations."
+  ]
+}
