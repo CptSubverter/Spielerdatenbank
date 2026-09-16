@@ -63,7 +63,7 @@ def resolve(z):
    return None,'pass_name_conflict'
  if name and club:
   s=by_nc.get((norm(name),norm(club)),set())
-  if len(s)==1:return next(iter(s),'name_unique_club_verified')
+  if len(s)==1:return next(iter(s)),'name_unique_club_verified'
  s=by_name.get(norm(name),set()) if name else set()
  if len(s)==1:return next(iter(s)),'name_unique'
  return (None,'ambiguous' if len(s)>1 else 'unresolved')
