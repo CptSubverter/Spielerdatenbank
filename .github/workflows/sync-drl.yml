@@ -1,0 +1,66 @@
+name: DRL Datenabgleich
+on:
+  push:
+    paths:
+      - '.github/workflows/sync-drl.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Abhängigkeiten installieren
+        run: pip install requests pandas xlrd openpyxl beautifulsoup4
+      - name: DRL-Archiv abrufen und Daten erzeugen
+        run: |
+          python - <<'PY'
+          import os,re,json,requests,subprocess
+          from bs4 import BeautifulSoup
+          import pandas as pd
+          from urllib.parse import urljoin
+          base='https://www.minigolfsport.de/'
+          page=requests.get(base+'sportbetrieb.php?subpage=18&title=Weltranglisten',timeout=60).text
+          soup=BeautifulSoup(page,'html.parser')
+          links=[]
+          for a in soup.find_all('a',href=True):
+            href=a['href']
+            if href.lower().endswith(('.xls','.xlsx')):
+              u=urljoin(base,href)
+              if u not in links: links.append(u)
+          os.makedirs('tmp/drl',exist_ok=True)
+          rows=[]
+          for u in links:
+            try:
+              b=requests.get(u,timeout=60).content
+              fn='tmp/drl/'+u.rsplit('/',1)[-1]
+              open(fn,'wb').write(b)
+              df=pd.read_excel(fn,dtype=str)
+              df.columns=[str(x).strip() for x in df.columns]
+              for _,r in df.iterrows():
+                d={str(k): ('' if pd.isna(v) else str(v)) for k,v in r.items()}
+                d['_source']=u
+                rows.append(d)
+            except Exception as e:
+              print('SKIP',u,e)
+          out='data/drl'
+          os.makedirs(out,exist_ok=True)
+          for f in os.listdir(out): os.remove(os.path.join(out,f))
+          chunk=5000
+          for i in range(0,len(rows),chunk):
+            with open(f'{out}/drl-{i//chunk+1:02d}.json','w',encoding='utf-8') as f:
+              json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
+          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':base+'sportbetrieb.php?subpage=18&title=Weltranglisten','records':len(rows),'files':(len(rows)+chunk-1)//chunk}
+          json.dump(manifest,open('data/drl/manifest.json','w',encoding='utf-8'),ensure_ascii=False,indent=2)
+          PY
+      - name: Änderungen veröffentlichen
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/drl
+          git diff --cached --quiet || git commit -m 'DRL-Archiv automatisch aktualisieren'
+          git push
