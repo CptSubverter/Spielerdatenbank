@@ -21,45 +21,56 @@ jobs:
       - name: Vollständiges DMV-DRL-Archiv abrufen
         run: |
           python - <<'PY'
-          import os,json,requests,pandas as pd,re
+          import os,json,requests,pandas as pd,re,hashlib
           from bs4 import BeautifulSoup
-          from urllib.parse import urljoin
+          from urllib.parse import urljoin,unquote
           base='https://www.minigolfsport.de/'
           archive=base+'sportbetrieb.php?s=11&subpage=18&t=Archivdaten'
-          r=requests.get(archive,timeout=60); r.raise_for_status()
+          r=requests.get(archive,timeout=60,headers={'User-Agent':'Mozilla/5.0'}); r.raise_for_status()
           soup=BeautifulSoup(r.text,'html.parser')
           links=[]
           for a in soup.find_all('a',href=True):
             h=a['href']; u=urljoin(base,h)
             if h.lower().endswith(('.xls','.xlsx')) and u not in links: links.append(u)
-          os.makedirs('tmp/drl',exist_ok=True); rows=[]; failed=[]
+          if not links: raise SystemExit('Keine XLS/XLSX-Dateien im offiziellen DRL-Archiv gefunden')
+          os.makedirs('tmp/drl',exist_ok=True); rows=[]; failed=[]; successful=[]
           for idx,u in enumerate(links,1):
             try:
-              fn='tmp/drl/'+u.rsplit('/',1)[-1]
-              b=requests.get(u,timeout=60); b.raise_for_status(); open(fn,'wb').write(b.content)
+              raw_name=unquote(u.rsplit('/',1)[-1])
+              safe_name=raw_name.replace('/','_')
+              fn='tmp/drl/'+safe_name
+              b=requests.get(u,timeout=90,headers={'User-Agent':'Mozilla/5.0'}); b.raise_for_status()
+              open(fn,'wb').write(b.content)
               df=pd.read_excel(fn,dtype=str)
               df.columns=[str(c).strip() for c in df.columns]
               source_file=os.path.basename(fn)
-              for _,rr in df.iterrows():
+              source_date=''
+              m=re.search(r'(?:19|20)\d{2}[-_.](?:0[1-9]|1[0-2])[-_.](?:0[1-9]|[12]\d|3[01])',source_file)
+              if m: source_date=m.group(0).replace('_','-').replace('.','-')
+              for row_no,rr in df.iterrows():
                 d={str(k):('' if pd.isna(v) else str(v)) for k,v in rr.items()}
-                d['_source']=u; d['_source_file']=source_file
+                d['_source']=u; d['_source_file']=source_file; d['_source_date']=source_date; d['_row']=int(row_no)+2
+                d['_record_id']=hashlib.sha1((u+'|'+str(row_no)).encode('utf-8')).hexdigest()[:16]
                 rows.append(d)
+              successful.append({'url':u,'file':source_file,'records':len(df),'date':source_date})
               print(idx,'OK',source_file,len(df))
             except Exception as e:
               failed.append({'url':u,'error':str(e)})
               print(idx,'SKIP',u,e)
+          if not rows: raise SystemExit('DRL-Archiv lieferte keine Datensätze')
           out='data/drl'; os.makedirs(out,exist_ok=True)
           for f in os.listdir(out):
             p=os.path.join(out,f)
             if os.path.isfile(p): os.remove(p)
           chunk=5000
           for i in range(0,len(rows),chunk):
-            with open(f'{out}/drl-{i//chunk+1:02d}.json','w',encoding='utf-8') as f:
+            with open(f'{out}/drl-{i//chunk+1:03d}.json','w',encoding='utf-8') as f:
               json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
-          dates=sorted(set(re.findall(r'(?:19|20)\d{2}[-_.](?:0[1-9]|1[0-2])[-_.](?:0[1-9]|[12]\d|3[01])',x.get('_source_file','')) for x in rows))
-          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'successful_files':len(links)-len(failed),'failed_files':failed,'records':len(rows),'files':(len(rows)+chunk-1)//chunk,'generated_at':pd.Timestamp.utcnow().isoformat()}
+          dates=sorted({x['_source_date'] for x in rows if x.get('_source_date')})
+          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'successful_files':len(successful),'failed_files':len(failed),'failed':failed,'files_detail':successful,'stichtage':dates,'records':len(rows),'files':(len(rows)+chunk-1)//chunk,'generated_at':pd.Timestamp.utcnow().isoformat()}
           with open(out+'/manifest.json','w',encoding='utf8') as f: json.dump(manifest,f,ensure_ascii=False,indent=2)
-          if not links or not rows: raise SystemExit('DRL-Archiv lieferte keine Dateien/Datensätze')
+          print('DRL-SYNC SUMMARY',json.dumps({'source_files':len(links),'successful_files':len(successful),'failed_files':len(failed),'records':len(rows),'chunks':(len(rows)+chunk-1)//chunk,'stichtage':len(dates)},ensure_ascii=False))
+          if failed: print('WARNUNG: Nicht alle Archivdateien konnten gelesen werden')
           PY
       - name: Änderungen veröffentlichen
         run: |
