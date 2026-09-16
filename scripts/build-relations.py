@@ -1,3 +1,4 @@
+# Relationen-Generator – automatischer Aufbau bei Änderungen der Quelldaten
 import json, re, os, glob, hashlib, unicodedata
 from collections import defaultdict
 
@@ -40,37 +41,25 @@ os.makedirs(OUT,exist_ok=True)
 for p in glob.glob(os.path.join(OUT,'*')):
     if os.path.isfile(p): os.remove(p)
 
-# ---- Players: canonical central entity ----
 players=[]
 for path in sorted(glob.glob(os.path.join(ROOT,'players-*.json'))):
     data=load_json(path)
-    for p in arr(data,('players','data')):
-        players.append(p)
+    players.extend(arr(data,('players','data')))
 
-by_id={}
-by_pass=defaultdict(set)
-by_name=defaultdict(set)
-by_name_club=defaultdict(set)
-player_out=[]
+by_id={}; by_pass=defaultdict(set); by_name=defaultdict(set); by_name_club=defaultdict(set); player_out=[]
 for i,p in enumerate(players):
     pid=str(first(p,('player_id','playerId','personId','person_id','id')) or f'P{i+1:06d}')
     name=str(first(p,('name','fullName','playerName','player_name','spielerName','spieler_name')))
     pas=str(first(p,('pass','passnummer','passNumber','card','cardNumber','dmvPass')))
-    club=teamless(first(p,('club','verein','vereine')))
-    lv=str(first(p,('lv','association','verband','landesverband')))
+    club=teamless(first(p,('club','verein','vereine'))); lv=str(first(p,('lv','association','verband','landesverband')))
     rec={'id':pid,'name':name,'pass':pas,'club':club,'lv':lv,'result_ids':[],'drl_ids':[],'match_status':'canonical'}
     by_id[pid]=rec; player_out.append(rec)
     if pas: by_pass[norm(pas)].add(pid)
     if name: by_name[norm(name)].add(pid)
     if name and club: by_name_club[(norm(name),norm(club))].add(pid)
 
-# ---- Results: stable IDs + conservative player matching ----
 results=[]; tournaments={}; clubs={}; associations={}
-
-def tournament_id(year,name,place):
-    key=f'{year}|{norm(name)}|{norm(place)}'
-    return 'T'+hashlib.sha1(key.encode()).hexdigest()[:12]
-
+def tournament_id(year,name,place): return 'T'+hashlib.sha1(f'{year}|{norm(name)}|{norm(place)}'.encode()).hexdigest()[:12]
 def club_id(name): return 'C'+hashlib.sha1(norm(teamless(name)).encode()).hexdigest()[:12]
 def assoc_id(name): return 'A'+hashlib.sha1(norm(name).encode()).hexdigest()[:12]
 
@@ -96,14 +85,12 @@ for fi,path in enumerate(sorted(glob.glob(os.path.join(ROOT,'results-*.json'))),
     for j,z in enumerate(rows):
         rid=f'R{fi:02d}-{j+1:06d}'
         name=str(first(z,('tournamentName','tournament_name','turnierName','turnier_name','tournament','turnier','eventName','event_name','code')))
-        year=str(first(z,('year','jahr')) or str(first(z,('date','datum')))[:4])
-        place=str(first(z,('place','ort','location','loc')))
+        year=str(first(z,('year','jahr')) or str(first(z,('date','datum')))[:4]); place=str(first(z,('place','ort','location','loc')))
         tid=tournament_id(year,name,place)
         if tid not in tournaments: tournaments[tid]={'id':tid,'year':year,'name':name,'date':str(first(z,('date','datum'))),'place':place,'result_ids':[],'player_ids':[]}
-        t=tournaments[tid]; t['result_ids'].append(rid)
+        tournaments[tid]['result_ids'].append(rid)
         pid,status=resolve_player(z)
-        if pid:
-            t['player_ids'].append(pid); by_id[pid]['result_ids'].append(rid)
+        if pid: tournaments[tid]['player_ids'].append(pid); by_id[pid]['result_ids'].append(rid)
         club=teamless(first(z,('club','verein','result_club','resultClub','Verein')))
         if club:
             cid=club_id(club); clubs.setdefault(cid,{'id':cid,'name':club,'player_ids':[],'result_ids':[],'tournament_ids':[]})
@@ -116,15 +103,11 @@ for fi,path in enumerate(sorted(glob.glob(os.path.join(ROOT,'results-*.json'))),
             if pid: associations[aid]['player_ids'].append(pid)
         results.append({'id':rid,'player_id':pid,'match_status':status,'tournament_id':tid,'year':year,'source_file':os.path.basename(path)})
 
-# ---- DRL: 223k archive records, linked lazily by relation chunks ----
 drl_ids=[]
 for path in sorted(glob.glob(os.path.join(ROOT,'drl','drl-*.json'))):
-    data=load_json(path)
-    for j,z in enumerate(data):
+    for j,z in enumerate(load_json(path)):
         did=str(z.get('_record_id') or f'D{os.path.basename(path)[4:7]}-{j+1:06d}')
-        name=str(first(z,('Name','name','player','Player','spieler','Spieler')))
-        pas=str(first(z,('Pass','pass','passnummer','Card','card')))
-        club=teamless(first(z,('Verein','verein','club','Club')))
+        name=str(first(z,('Name','name','player','Player','spieler','Spieler'))); pas=str(first(z,('Pass','pass','passnummer','Card','card'))); club=teamless(first(z,('Verein','verein','club','Club')))
         pid=None; status='unresolved'
         if pas:
             c=by_pass.get(norm(pas),set())
@@ -139,17 +122,13 @@ for path in sorted(glob.glob(os.path.join(ROOT,'drl','drl-*.json'))):
         if pid: by_id[pid]['drl_ids'].append(did)
         drl_ids.append({'id':did,'player_id':pid,'match_status':status,'date':str(first(z,('_source_date','date','Datum','Stichtag'))),'name':name,'pass':pas,'club':club,'lv':str(first(z,('LV','lv','Landesverband'))),'source_file':str(z.get('_source_file',''))})
 
-# unique reverse lists
 for coll in (tournaments.values(),clubs.values(),associations.values()):
     for x in coll:
         for k in ('player_ids','result_ids','tournament_ids','club_ids'):
             if k in x: x[k]=sorted(set(x[k]))
-
 for x in player_out:
-    x['result_ids']=sorted(set(x['result_ids']))
-    x['drl_ids']=sorted(set(x['drl_ids']))
+    x['result_ids']=sorted(set(x['result_ids'])); x['drl_ids']=sorted(set(x['drl_ids']))
 
-# Chunk result and DRL relation records to keep browser loads small.
 def write_chunks(items,prefix,size=5000):
     files=[]
     for i in range(0,len(items),size):
@@ -157,14 +136,9 @@ def write_chunks(items,prefix,size=5000):
         with open(path,'w',encoding='utf-8') as f: json.dump(items[i:i+size],f,ensure_ascii=False,separators=(',',':'))
         files.append(fn)
     return files
-
-rf=write_chunks(results,os.path.join(OUT,'results'))
-df=write_chunks(drl_ids,os.path.join(OUT,'drl'))
-with open(os.path.join(OUT,'players.json'),'w',encoding='utf-8') as f: json.dump(player_out,f,ensure_ascii=False,separators=(',',':'))
-with open(os.path.join(OUT,'clubs.json'),'w',encoding='utf-8') as f: json.dump(list(clubs.values()),f,ensure_ascii=False,separators=(',',':'))
-with open(os.path.join(OUT,'associations.json'),'w',encoding='utf-8') as f: json.dump(list(associations.values()),f,ensure_ascii=False,separators=(',',':'))
-with open(os.path.join(OUT,'tournaments.json'),'w',encoding='utf-8') as f: json.dump(list(tournaments.values()),f,ensure_ascii=False,separators=(',',':'))
-
+rf=write_chunks(results,os.path.join(OUT,'results')); df=write_chunks(drl_ids,os.path.join(OUT,'drl'))
+for fn,obj in [('players.json',player_out),('clubs.json',list(clubs.values())),('associations.json',list(associations.values())),('tournaments.json',list(tournaments.values()))]:
+    with open(os.path.join(OUT,fn),'w',encoding='utf-8') as f: json.dump(obj,f,ensure_ascii=False,separators=(',',':'))
 status=defaultdict(int)
 for r in results: status['results_'+r['match_status']]+=1
 for r in drl_ids: status['drl_'+r['match_status']]+=1
