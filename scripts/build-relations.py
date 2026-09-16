@@ -1,4 +1,5 @@
 # Relationen-Generator – automatischer Aufbau bei Änderungen der Quelldaten
+# Build trigger: rebuild after validated DRL archive refresh.
 import json, re, os, glob, hashlib, unicodedata
 from collections import defaultdict
 ROOT='data'; OUT=os.path.join(ROOT,'relations')
