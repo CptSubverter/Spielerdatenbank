@@ -21,34 +21,45 @@ jobs:
       - name: Vollständiges DMV-DRL-Archiv abrufen
         run: |
           python - <<'PY'
-          import os,json,requests,pandas as pd
+          import os,json,requests,pandas as pd,re
           from bs4 import BeautifulSoup
           from urllib.parse import urljoin
           base='https://www.minigolfsport.de/'
           archive=base+'sportbetrieb.php?s=11&subpage=18&t=Archivdaten'
-          html=requests.get(archive,timeout=60).text
-          soup=BeautifulSoup(html,'html.parser')
+          r=requests.get(archive,timeout=60); r.raise_for_status()
+          soup=BeautifulSoup(r.text,'html.parser')
           links=[]
           for a in soup.find_all('a',href=True):
             h=a['href']; u=urljoin(base,h)
             if h.lower().endswith(('.xls','.xlsx')) and u not in links: links.append(u)
-          os.makedirs('tmp/drl',exist_ok=True); rows=[]
+          os.makedirs('tmp/drl',exist_ok=True); rows=[]; failed=[]
           for idx,u in enumerate(links,1):
             try:
               fn='tmp/drl/'+u.rsplit('/',1)[-1]
-              b=requests.get(u,timeout=60).content; open(fn,'wb').write(b)
+              b=requests.get(u,timeout=60); b.raise_for_status(); open(fn,'wb').write(b.content)
               df=pd.read_excel(fn,dtype=str)
               df.columns=[str(c).strip() for c in df.columns]
-              for _,r in df.iterrows():
-                d={str(k):('' if pd.isna(v) else str(v)) for k,v in r.items()}; d['_source']=u; rows.append(d)
-              print(idx,'OK',u,len(df))
-            except Exception as e: print(idx,'SKIP',u,e)
+              source_file=os.path.basename(fn)
+              for _,rr in df.iterrows():
+                d={str(k):('' if pd.isna(v) else str(v)) for k,v in rr.items()}
+                d['_source']=u; d['_source_file']=source_file
+                rows.append(d)
+              print(idx,'OK',source_file,len(df))
+            except Exception as e:
+              failed.append({'url':u,'error':str(e)})
+              print(idx,'SKIP',u,e)
           out='data/drl'; os.makedirs(out,exist_ok=True)
-          for f in os.listdir(out): os.remove(os.path.join(out,f))
+          for f in os.listdir(out):
+            p=os.path.join(out,f)
+            if os.path.isfile(p): os.remove(p)
           chunk=5000
           for i in range(0,len(rows),chunk):
-            with open(f'{out}/drl-{i//chunk+1:02d}.json','w',encoding='utf-8') as f: json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
-          json.dump({'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'records':len(rows),'files':(len(rows)+chunk-1)//chunk},open(out+'/manifest.json','w',encoding='utf8'),ensure_ascii=False,indent=2)
+            with open(f'{out}/drl-{i//chunk+1:02d}.json','w',encoding='utf-8') as f:
+              json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
+          dates=sorted(set(re.findall(r'(?:19|20)\d{2}[-_.](?:0[1-9]|1[0-2])[-_.](?:0[1-9]|[12]\d|3[01])',x.get('_source_file','')) for x in rows))
+          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'successful_files':len(links)-len(failed),'failed_files':failed,'records':len(rows),'files':(len(rows)+chunk-1)//chunk,'generated_at':pd.Timestamp.utcnow().isoformat()}
+          with open(out+'/manifest.json','w',encoding='utf8') as f: json.dump(manifest,f,ensure_ascii=False,indent=2)
+          if not links or not rows: raise SystemExit('DRL-Archiv lieferte keine Dateien/Datensätze')
           PY
       - name: Änderungen veröffentlichen
         run: |
