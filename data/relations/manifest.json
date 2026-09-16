@@ -1,21 +1,21 @@
 {
-  "version": "relations-v2",
-  "generated_at": "2026-09-16T17:09:50.955320+00:00",
+  "version": "relations-v3",
+  "generated_at": "2026-09-16T18:41:45.590708+00:00",
   "players": 7564,
-  "results": 156744,
-  "tournaments": 12965,
+  "results": 156704,
+  "tournaments": 1798,
   "clubs": 622,
-  "associations": 141,
+  "associations": 13,
   "drl_records": 222887,
   "result_chunks": 32,
   "drl_chunks": 45,
   "match_status_counts": {
-    "results_pass_verified": 155395,
+    "results_pass_verified": 155355,
     "results_name_unique_club_verified": 851,
     "results_name_unique": 495,
     "results_ambiguous": 3,
-    "drl_pass_verified": 217568,
-    "drl_pass_name_conflict": 4145,
+    "drl_pass_verified": 217633,
+    "drl_pass_name_conflict": 4080,
     "drl_name_unique_club_verified": 19,
     "drl_name_unique": 394,
     "drl_unresolved": 761
@@ -106,11 +106,5 @@
       "drl-044.json",
       "drl-045.json"
     ]
-  },
-  "drl_link_repair": {
-    "pass_verified": 221792,
-    "name_unique": 320,
-    "unresolved": 761,
-    "name_unique_club_verified": 14
   }
 }
