@@ -16,7 +16,7 @@ def fuzzy(d,terms):
   nk=norm(k)
   if any(t in nk for t in terms) and v not in ('',None): return v
  return ''
-rel='data/relations'; players=json.load(open(rel+'/players.json',encoding='utf8')); pbyid={p['id']:p for p in players}
+rel='data/relations'; os.makedirs(rel+'/drl',exist_ok=True); players=json.load(open(rel+'/players.json',encoding='utf8')); pbyid={p['id']:p for p in players}
 by_pass=defaultdict(set); by_name=defaultdict(set); by_name_club=defaultdict(set)
 for p in players:
  if p.get('pass'):by_pass[norm(p['pass'])].add(p['id'])
@@ -27,9 +27,8 @@ status=defaultdict(int); total=0
 for path in sorted(glob.glob('data/drl/drl-*.json')):
  rows=json.load(open(path,encoding='utf8')); out=[]
  for j,z in enumerate(rows):
-  did=str(z.get('_record_id') or f'D{os.path.basename(path)[4:7]}-{j+1:06d}')
-  name=str(fuzzy(z,['name','spieler','player'])); pas=str(fuzzy(z,['pass','card'])); club=teamless(fuzzy(z,['verein','club'])); lv=str(fuzzy(z,['landesverband','verband',' lv']))
-  pid=None; st='unresolved'; c=by_pass.get(norm(pas),set()) if pas else set()
+  did=str(z.get('_record_id') or f'D{os.path.basename(path)[4:7]}-{j+1:06d}'); name=str(fuzzy(z,['name','spieler','player'])); pas=str(fuzzy(z,['pass','card'])); club=teamless(fuzzy(z,['verein','club'])); lv=str(fuzzy(z,['landesverband','verband',' lv'])); pid=None; st='unresolved'
+  c=by_pass.get(norm(pas),set()) if pas else set()
   if len(c)==1:pid=next(iter(c));st='pass_verified'
   if not pid and name and club:
    c=by_name_club.get((norm(name),norm(club)),set())
