@@ -1,0 +1,25 @@
+{
+  "version":"relation-layer-2026-09-16",
+  "status":"runtime-linked-core",
+  "player_source":"players-01.json … players-08.json",
+  "result_source":"results-01.json … results-08.json",
+  "entities":["player","result","tournament","club","association","drl","dmv_list"],
+  "implemented_links":[
+    "player -> result",
+    "player -> tournament",
+    "player -> club",
+    "player -> association",
+    "result -> player",
+    "result -> tournament",
+    "tournament -> player",
+    "tournament -> result",
+    "club -> player",
+    "club -> tournament",
+    "association -> player",
+    "association -> club",
+    "association -> tournament"
+  ],
+  "identity_rule":"No uncertain identity is silently assigned; result matching is marked matched, ambiguous or unresolved.",
+  "club_normalization":"Team suffixes I-V and 1-5 plus e.V. are ignored for canonical club identity; original source values remain in source data.",
+  "next_data_layer":"Full DRL archive (111226 history records) and authoritative DMV tournament/list relation files are still to be materialized as repository datasets."
+}
