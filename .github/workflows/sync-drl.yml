@@ -18,10 +18,10 @@ jobs:
           python-version: '3.x'
       - name: Abhängigkeiten installieren
         run: pip install requests pandas xlrd openpyxl beautifulsoup4
-      - name: Vollständiges DMV-DRL-Archiv abrufen
+      - name: Vollständiges DMV-DRL-Archiv abrufen und sauber strukturieren
         run: |
           python - <<'PY'
-          import os,json,requests,pandas as pd,re,hashlib
+          import os,json,requests,pandas as pd,re,hashlib,unicodedata
           from bs4 import BeautifulSoup
           from urllib.parse import urljoin,unquote
           base='https://www.minigolfsport.de/'
@@ -33,41 +33,72 @@ jobs:
             h=a['href']; u=urljoin(base,h)
             if h.lower().endswith(('.xls','.xlsx')) and u not in links: links.append(u)
           if not links: raise SystemExit('Keine XLS/XLSX-Dateien im offiziellen DRL-Archiv gefunden')
+          def norm(v):
+            s=str(v or '').strip()
+            for _ in range(2):
+              if any(x in s for x in ('Ã','Â','â','ð')):
+                try:s=s.encode('latin1').decode('utf-8')
+                except Exception:pass
+            s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)).lower()
+            return re.sub(r'[^a-z0-9]+','',s.replace('ß','ss'))
+          def find_header(raw):
+            aliases={'name':{'name','spieler','player'},'pass':{'pass','passnummer','passnr','karte','kartennummer'},'club':{'verein','club'},'lv':{'lv','landesverband','verband'},'kat':{'kat','kategorie'},'rang':{'platz','rang','rank'},'wert':{'wert','value'},'anzahl':{'anzahl'},'ergebnisse':{'ergebnisse'}}
+            best=(-1,None,None)
+            for i,row in raw.iterrows():
+              vals=[norm(v) for v in row.tolist()]
+              hits=0; mapping={}
+              for j,v in enumerate(vals):
+                for key,als in aliases.items():
+                  if v in {norm(a) for a in als}:
+                    hits+=1; mapping[key]=j; break
+              if hits>best[0]: best=(hits,i,mapping)
+            return best
+          def clean(v):
+            if pd.isna(v): return ''
+            s=str(v).strip()
+            return '' if s.lower() in ('nan','none','nat') else s
           os.makedirs('tmp/drl',exist_ok=True); rows=[]; failed=[]; successful=[]
           for idx,u in enumerate(links,1):
             try:
-              raw_name=unquote(u.rsplit('/',1)[-1])
-              safe_name=raw_name.replace('/','_')
-              fn='tmp/drl/'+safe_name
-              b=requests.get(u,timeout=90,headers={'User-Agent':'Mozilla/5.0'}); b.raise_for_status()
-              open(fn,'wb').write(b.content)
-              df=pd.read_excel(fn,dtype=str)
-              df.columns=[str(c).strip() for c in df.columns]
-              source_file=os.path.basename(fn)
-              source_date=''
+              raw_name=unquote(u.rsplit('/',1)[-1]); safe_name=raw_name.replace('/','_'); fn='tmp/drl/'+safe_name
+              b=requests.get(u,timeout=90,headers={'User-Agent':'Mozilla/5.0'}); b.raise_for_status(); open(fn,'wb').write(b.content)
+              raw=pd.read_excel(fn,header=None,dtype=str)
+              hits,hrow,mapping=find_header(raw)
+              if hits < 3 or 'name' not in mapping:
+                raise ValueError(f'Keine verwertbare DRL-Kopfzeile gefunden (Treffer={hits}, Zeile={hrow})')
+              source_file=os.path.basename(fn); source_date=''
               m=re.search(r'(?:19|20)\d{2}[-_.](?:0[1-9]|1[0-2])[-_.](?:0[1-9]|[12]\d|3[01])',source_file)
               if m: source_date=m.group(0).replace('_','-').replace('.','-')
-              for row_no,rr in df.iterrows():
-                d={str(k):('' if pd.isna(v) else str(v)) for k,v in rr.items()}
-                d['_source']=u; d['_source_file']=source_file; d['_source_date']=source_date; d['_row']=int(row_no)+2
-                d['_record_id']=hashlib.sha1((u+'|'+str(row_no)).encode('utf-8')).hexdigest()[:16]
-                rows.append(d)
-              successful.append({'url':u,'file':source_file,'records':len(df),'date':source_date})
-              print(idx,'OK',source_file,len(df))
+              for row_no in range(hrow+1,len(raw)):
+                rr=raw.iloc[row_no]
+                name=clean(rr.iloc[mapping['name']])
+                pas=clean(rr.iloc[mapping['pass']]) if 'pass' in mapping else ''
+                club=clean(rr.iloc[mapping['club']]) if 'club' in mapping else ''
+                lv=clean(rr.iloc[mapping['lv']]) if 'lv' in mapping else ''
+                kat=clean(rr.iloc[mapping['kat']]) if 'kat' in mapping else ''
+                rank=clean(rr.iloc[mapping['rang']]) if 'rang' in mapping else ''
+                value=clean(rr.iloc[mapping['wert']]) if 'wert' in mapping else ''
+                if not name or norm(name) in {'platz','name','spieler'}: continue
+                if re.fullmatch(r'\d+(?:\.\d+)?',name) and not pas and not club: continue
+                rec={'Name':name,'Pass':pas,'Verein':club,'LV':lv,'Kat.':kat,'Platz':rank,'Wert':value,'_source':u,'_source_file':source_file,'_source_date':source_date,'_row':row_no+1,'_record_id':hashlib.sha1((u+'|'+str(row_no)).encode('utf-8')).hexdigest()[:16]}
+                if 'anzahl' in mapping: rec['Anzahl']=clean(rr.iloc[mapping['anzahl']])
+                if 'ergebnisse' in mapping: rec['Ergebnisse']=clean(rr.iloc[mapping['ergebnisse']])
+                rows.append(rec)
+              successful.append({'url':u,'file':source_file,'records':sum(1 for x in rows if x['_source_file']==source_file),'date':source_date})
+              print(idx,'OK',source_file,successful[-1]['records'],'header',hrow,'fields',mapping)
             except Exception as e:
               failed.append({'url':u,'error':str(e)})
               print(idx,'SKIP',u,e)
-          if not rows: raise SystemExit('DRL-Archiv lieferte keine Datensätze')
+          if not rows: raise SystemExit('DRL-Archiv lieferte keine verwertbaren Spielerdatensätze')
           out='data/drl'; os.makedirs(out,exist_ok=True)
           for f in os.listdir(out):
             p=os.path.join(out,f)
             if os.path.isfile(p): os.remove(p)
           chunk=5000
           for i in range(0,len(rows),chunk):
-            with open(f'{out}/drl-{i//chunk+1:03d}.json','w',encoding='utf-8') as f:
-              json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
+            with open(f'{out}/drl-{i//chunk+1:03d}.json','w',encoding='utf-8') as f: json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
           dates=sorted({x['_source_date'] for x in rows if x.get('_source_date')})
-          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'successful_files':len(successful),'failed_files':len(failed),'failed':failed,'files_detail':successful,'stichtage':dates,'records':len(rows),'files':(len(rows)+chunk-1)//chunk,'generated_at':pd.Timestamp.utcnow().isoformat()}
+          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'successful_files':len(successful),'failed_files':len(failed),'failed':failed,'files_detail':successful,'stichtage':dates,'records':len(rows),'files':(len(rows)+chunk-1)//chunk,'generated_at':pd.Timestamp.utcnow().isoformat(),'parser':'header-detection-v2'}
           with open(out+'/manifest.json','w',encoding='utf8') as f: json.dump(manifest,f,ensure_ascii=False,indent=2)
           print('DRL-SYNC SUMMARY',json.dumps({'source_files':len(links),'successful_files':len(successful),'failed_files':len(failed),'records':len(rows),'chunks':(len(rows)+chunk-1)//chunk,'stichtage':len(dates)},ensure_ascii=False))
           if failed: print('WARNUNG: Nicht alle Archivdateien konnten gelesen werden')
