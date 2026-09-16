@@ -1,6 +1,494 @@
 {
   "source": "DMV Deutsche Rangliste Archiv",
-  "source_page": "https://www.minigolfsport.de/sportbetrieb.php?subpage=18&title=Weltranglisten",
-  "records": 2489,
-  "files": 1
+  "source_page": "https://www.minigolfsport.de/sportbetrieb.php?s=11&subpage=18&t=Archivdaten",
+  "source_files": 78,
+  "successful_files": 78,
+  "failed_files": 0,
+  "failed": [],
+  "files_detail": [
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/DRL%202026-06-30(1).xls",
+      "file": "DRL 2026-06-30(1).xls",
+      "records": 2489,
+      "date": "2026-06-30"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/DRL%202026-04-30.xls",
+      "file": "DRL 2026-04-30.xls",
+      "records": 2489,
+      "date": "2026-04-30"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/DRL%202026-02-28.xls",
+      "file": "DRL 2026-02-28.xls",
+      "records": 2406,
+      "date": "2026-02-28"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/DRL%202026-01-01.xls",
+      "file": "DRL 2026-01-01.xls",
+      "records": 2425,
+      "date": "2026-01-01"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/DRL%202025-10-31.xls",
+      "file": "DRL 2025-10-31.xls",
+      "records": 2429,
+      "date": "2025-10-31"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/DRL%202025-08-31.xls",
+      "file": "DRL 2025-08-31.xls",
+      "records": 2433,
+      "date": "2025-08-31"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Deutsche%20Rangliste/2025/DRL%202025-06-30.xls",
+      "file": "DRL 2025-06-30.xls",
+      "records": 2426,
+      "date": "2025-06-30"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste95.xls",
+      "file": "rangliste95.xls",
+      "records": 2459,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste94.xls",
+      "file": "rangliste94.xls",
+      "records": 2389,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Deutsche%20Rangliste/2025/DRL%202025-01-01.xls",
+      "file": "DRL 2025-01-01.xls",
+      "records": 2427,
+      "date": "2025-01-01"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste_93.xls",
+      "file": "rangliste_93.xls",
+      "records": 2420,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Deutsche%20Rangliste/DRL%202024-10-31.xls",
+      "file": "DRL 2024-10-31.xls",
+      "records": 2407,
+      "date": "2024-10-31"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Deutsche%20Rangliste/DRL%202024-08-31.xls",
+      "file": "DRL 2024-08-31.xls",
+      "records": 2441,
+      "date": "2024-08-31"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Deutsche%20Rangliste/DRL%202024-06-30.xls",
+      "file": "DRL 2024-06-30.xls",
+      "records": 2440,
+      "date": "2024-06-30"
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste92.xls",
+      "file": "rangliste92.xls",
+      "records": 2377,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste91.xls",
+      "file": "rangliste91.xls",
+      "records": 2331,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste90.xls",
+      "file": "rangliste90.xls",
+      "records": 2379,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste89.xls",
+      "file": "rangliste89.xls",
+      "records": 2363,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste88.xls",
+      "file": "rangliste88.xls",
+      "records": 2418,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste87.xls",
+      "file": "rangliste87.xls",
+      "records": 2420,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste86.xls",
+      "file": "rangliste86.xls",
+      "records": 2525,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste85.xls",
+      "file": "rangliste85.xls",
+      "records": 2526,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste83_2.xls",
+      "file": "rangliste83_2.xls",
+      "records": 2853,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste81.xls",
+      "file": "rangliste81.xls",
+      "records": 2802,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste80.xls",
+      "file": "rangliste80.xls",
+      "records": 2758,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste79.xls",
+      "file": "rangliste79.xls",
+      "records": 2666,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste78(1).xls",
+      "file": "rangliste78(1).xls",
+      "records": 2468,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste77(1).xls",
+      "file": "rangliste77(1).xls",
+      "records": 2468,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste76_korr3.xls",
+      "file": "rangliste76_korr3.xls",
+      "records": 2654,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste75.xls",
+      "file": "rangliste75.xls",
+      "records": 2725,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste74.xls",
+      "file": "rangliste74.xls",
+      "records": 2743,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste73.xls",
+      "file": "rangliste73.xls",
+      "records": 2779,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste72.xls",
+      "file": "rangliste72.xls",
+      "records": 2827,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste71.xls",
+      "file": "rangliste71.xls",
+      "records": 2742,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste70.xls",
+      "file": "rangliste70.xls",
+      "records": 2786,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste_69.xls",
+      "file": "rangliste_69.xls",
+      "records": 2779,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste68_neu.xls",
+      "file": "rangliste68_neu.xls",
+      "records": 2826,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste67.xls",
+      "file": "rangliste67.xls",
+      "records": 2855,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste65neu.xls",
+      "file": "rangliste65neu.xls",
+      "records": 2756,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste64.xls",
+      "file": "rangliste64.xls",
+      "records": 2797,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste63.xls",
+      "file": "rangliste63.xls",
+      "records": 2787,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste62.xls",
+      "file": "rangliste62.xls",
+      "records": 2803,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste61.xls",
+      "file": "rangliste61.xls",
+      "records": 2848,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste60.xls",
+      "file": "rangliste60.xls",
+      "records": 2886,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste59.xls",
+      "file": "rangliste59.xls",
+      "records": 2743,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste58.xls",
+      "file": "rangliste58.xls",
+      "records": 2793,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste57.xls",
+      "file": "rangliste57.xls",
+      "records": 2742,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste56B.xls",
+      "file": "rangliste56B.xls",
+      "records": 2827,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste55.xls",
+      "file": "rangliste55.xls",
+      "records": 2850,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste54.xls",
+      "file": "rangliste54.xls",
+      "records": 2964,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste53.xls",
+      "file": "rangliste53.xls",
+      "records": 3017,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste52.xls",
+      "file": "rangliste52.xls",
+      "records": 2982,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste51.xls",
+      "file": "rangliste51.xls",
+      "records": 3051,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste50.xls",
+      "file": "rangliste50.xls",
+      "records": 3055,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste49.xls",
+      "file": "rangliste49.xls",
+      "records": 3029,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste48.xls",
+      "file": "rangliste48.xls",
+      "records": 3015,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste47.xls",
+      "file": "rangliste47.xls",
+      "records": 3033,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste46.xls",
+      "file": "rangliste46.xls",
+      "records": 3137,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste45.xls",
+      "file": "rangliste45.xls",
+      "records": 3168,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste44.xls",
+      "file": "rangliste44.xls",
+      "records": 3144,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste43.xls",
+      "file": "rangliste43.xls",
+      "records": 3144,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste42.xls",
+      "file": "rangliste42.xls",
+      "records": 3318,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste41.xls",
+      "file": "rangliste41.xls",
+      "records": 3362,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste40.xls",
+      "file": "rangliste40.xls",
+      "records": 3437,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste39.xls",
+      "file": "rangliste39.xls",
+      "records": 3437,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste38.xls",
+      "file": "rangliste38.xls",
+      "records": 3424,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste37.xls",
+      "file": "rangliste37.xls",
+      "records": 3403,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste36.xls",
+      "file": "rangliste36.xls",
+      "records": 3398,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste35-1.xls",
+      "file": "rangliste35-1.xls",
+      "records": 3370,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste35.xls",
+      "file": "rangliste35.xls",
+      "records": 3452,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste34.xls",
+      "file": "rangliste34.xls",
+      "records": 3461,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste33.xls",
+      "file": "rangliste33.xls",
+      "records": 3477,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste32.xls",
+      "file": "rangliste32.xls",
+      "records": 3507,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste31.xls",
+      "file": "rangliste31.xls",
+      "records": 3513,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste30.xls",
+      "file": "rangliste30.xls",
+      "records": 3540,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste29.xls",
+      "file": "rangliste29.xls",
+      "records": 3639,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste28.xls",
+      "file": "rangliste28.xls",
+      "records": 3762,
+      "date": ""
+    },
+    {
+      "url": "https://www.minigolfsport.de/pdf/Sportbetrieb/Deutsche%20Rangliste/rangliste27.xls",
+      "file": "rangliste27.xls",
+      "records": 3758,
+      "date": ""
+    }
+  ],
+  "stichtage": [
+    "2024-06-30",
+    "2024-08-31",
+    "2024-10-31",
+    "2025-01-01",
+    "2025-06-30",
+    "2025-08-31",
+    "2025-10-31",
+    "2026-01-01",
+    "2026-02-28",
+    "2026-04-30",
+    "2026-06-30"
+  ],
+  "records": 223979,
+  "files": 45,
+  "generated_at": "2026-09-16T11:31:56.308403+00:00"
 }
