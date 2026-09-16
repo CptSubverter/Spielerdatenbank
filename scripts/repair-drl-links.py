@@ -23,9 +23,12 @@ for p in players:
  if p.get('name'):by_name[norm(p['name'])].add(p['id'])
  if p.get('name') and p.get('club'):by_name_club[(norm(p['name']),norm(p['club']))].add(p['id'])
 for p in players:p['drl_ids']=[]
-status=defaultdict(int); total=0
+status=defaultdict(int); total=0; printed=False
 for path in sorted(glob.glob('data/drl/drl-*.json')):
- rows=json.load(open(path,encoding='utf8')); out=[]
+ rows=json.load(open(path,encoding='utf8'))
+ if not printed and rows:
+  print('DRL_SAMPLE_KEYS',list(rows[0].keys())); print('DRL_SAMPLE_ROW',rows[0]); printed=True
+ out=[]
  for j,z in enumerate(rows):
   did=str(z.get('_record_id') or f'D{os.path.basename(path)[4:7]}-{j+1:06d}'); name=str(fuzzy(z,['name','spieler','player'])); pas=str(fuzzy(z,['pass','card'])); club=teamless(fuzzy(z,['verein','club'])); lv=str(fuzzy(z,['landesverband','verband',' lv'])); pid=None; st='unresolved'
   c=by_pass.get(norm(pas),set()) if pas else set()
