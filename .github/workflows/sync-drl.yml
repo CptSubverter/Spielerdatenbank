@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - '.github/workflows/sync-drl.yml'
+  schedule:
+    - cron: '17 4 * * 1'
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,46 +18,37 @@ jobs:
           python-version: '3.x'
       - name: Abhängigkeiten installieren
         run: pip install requests pandas xlrd openpyxl beautifulsoup4
-      - name: DRL-Archiv abrufen und Daten erzeugen
+      - name: Vollständiges DMV-DRL-Archiv abrufen
         run: |
           python - <<'PY'
-          import os,re,json,requests,subprocess
+          import os,json,requests,pandas as pd
           from bs4 import BeautifulSoup
-          import pandas as pd
           from urllib.parse import urljoin
           base='https://www.minigolfsport.de/'
-          page=requests.get(base+'sportbetrieb.php?subpage=18&title=Weltranglisten',timeout=60).text
-          soup=BeautifulSoup(page,'html.parser')
+          archive=base+'sportbetrieb.php?s=11&subpage=18&t=Archivdaten'
+          html=requests.get(archive,timeout=60).text
+          soup=BeautifulSoup(html,'html.parser')
           links=[]
           for a in soup.find_all('a',href=True):
-            href=a['href']
-            if href.lower().endswith(('.xls','.xlsx')):
-              u=urljoin(base,href)
-              if u not in links: links.append(u)
-          os.makedirs('tmp/drl',exist_ok=True)
-          rows=[]
-          for u in links:
+            h=a['href']; u=urljoin(base,h)
+            if h.lower().endswith(('.xls','.xlsx')) and u not in links: links.append(u)
+          os.makedirs('tmp/drl',exist_ok=True); rows=[]
+          for idx,u in enumerate(links,1):
             try:
-              b=requests.get(u,timeout=60).content
               fn='tmp/drl/'+u.rsplit('/',1)[-1]
-              open(fn,'wb').write(b)
+              b=requests.get(u,timeout=60).content; open(fn,'wb').write(b)
               df=pd.read_excel(fn,dtype=str)
-              df.columns=[str(x).strip() for x in df.columns]
+              df.columns=[str(c).strip() for c in df.columns]
               for _,r in df.iterrows():
-                d={str(k): ('' if pd.isna(v) else str(v)) for k,v in r.items()}
-                d['_source']=u
-                rows.append(d)
-            except Exception as e:
-              print('SKIP',u,e)
-          out='data/drl'
-          os.makedirs(out,exist_ok=True)
+                d={str(k):('' if pd.isna(v) else str(v)) for k,v in r.items()}; d['_source']=u; rows.append(d)
+              print(idx,'OK',u,len(df))
+            except Exception as e: print(idx,'SKIP',u,e)
+          out='data/drl'; os.makedirs(out,exist_ok=True)
           for f in os.listdir(out): os.remove(os.path.join(out,f))
           chunk=5000
           for i in range(0,len(rows),chunk):
-            with open(f'{out}/drl-{i//chunk+1:02d}.json','w',encoding='utf-8') as f:
-              json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
-          manifest={'source':'DMV Deutsche Rangliste Archiv','source_page':base+'sportbetrieb.php?subpage=18&title=Weltranglisten','records':len(rows),'files':(len(rows)+chunk-1)//chunk}
-          json.dump(manifest,open('data/drl/manifest.json','w',encoding='utf-8'),ensure_ascii=False,indent=2)
+            with open(f'{out}/drl-{i//chunk+1:02d}.json','w',encoding='utf-8') as f: json.dump(rows[i:i+chunk],f,ensure_ascii=False,separators=(',',':'))
+          json.dump({'source':'DMV Deutsche Rangliste Archiv','source_page':archive,'source_files':len(links),'records':len(rows),'files':(len(rows)+chunk-1)//chunk},open(out+'/manifest.json','w',encoding='utf8'),ensure_ascii=False,indent=2)
           PY
       - name: Änderungen veröffentlichen
         run: |
