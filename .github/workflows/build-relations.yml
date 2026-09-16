@@ -6,6 +6,7 @@ on:
       - 'data/results-*.json'
       - 'data/drl/*.json'
       - 'scripts/build-relations.py'
+      - 'scripts/audit-relations.py'
   workflow_dispatch:
 permissions:
   contents: write
@@ -19,6 +20,8 @@ jobs:
           python-version: '3.x'
       - name: Relationen erzeugen
         run: python scripts/build-relations.py
+      - name: Vollständige Relationsprüfung
+        run: python scripts/audit-relations.py
       - name: Relationen veröffentlichen
         run: |
           git config user.name 'github-actions[bot]'
