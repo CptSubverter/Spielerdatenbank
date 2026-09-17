@@ -19,3 +19,4 @@ Abgeglichene statische Datenbank für Bahnengolf.net. Die Daten wurden mit den v
 Die Oberfläche lädt die Daten direkt aus demselben GitHub-Pages-Verzeichnis.
 
 Technischer Hinweis: Die Relationsdaten werden automatisch per GitHub Actions neu aufgebaut, wenn sich die Quelldaten oder der Relationsgenerator ändern.
+
