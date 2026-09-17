@@ -5,8 +5,11 @@ on:
       - 'data/players-*.json'
       - 'data/results-*.json'
       - 'data/drl/*.json'
+      - 'data/jlp-2025.json'
       - 'scripts/build-relations.py'
       - 'scripts/audit-relations.py'
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 permissions:
   contents: write
