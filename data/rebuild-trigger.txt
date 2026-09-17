@@ -1,0 +1,3 @@
+# Relation rebuild trigger
+
+Trigger for the verified relation rebuild on the current main revision.
