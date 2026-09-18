@@ -1,6 +1,6 @@
 {
   "version": "relations-v3",
-  "generated_at": "2026-09-18T15:35:34.554307+00:00",
+  "generated_at": "2026-09-18T15:46:55.759983+00:00",
   "players": 7564,
   "results": 156704,
   "tournaments": 1798,
@@ -106,11 +106,5 @@
       "drl-044.json",
       "drl-045.json"
     ]
-  },
-  "drl_link_repair": {
-    "pass_verified": 221792,
-    "name_unique": 320,
-    "unresolved": 761,
-    "name_unique_club_verified": 14
   }
 }
