@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kreis mit verschiebbarem Kreuz</title>
+<style>
+html,body{margin:0;background:#fff;font-family:Arial,sans-serif}
+body{padding:10px}
+#stage{position:relative;width:min(94vw,600px);margin:auto;touch-action:none;user-select:none}
+svg{display:block;width:100%;height:auto}
+#hit{position:absolute;width:76px;height:76px;transform:translate(-50%,-50%);border:0;background:transparent;z-index:3;touch-action:none}
+#cross{position:absolute;width:24px;height:24px;transform:translate(-50%,-50%);pointer-events:none;z-index:4}
+#cross:before,#cross:after{content:"";position:absolute;left:50%;top:50%;background:#e00000;transform:translate(-50%,-50%)}
+#cross:before{width:22px;height:4px}
+#cross:after{width:4px;height:22px}
+.controls{width:min(94vw,600px);margin:14px auto}
+button,input,textarea{width:100%;box-sizing:border-box;padding:11px;margin:4px 0;font-size:16px;border:1px solid #bbb;border-radius:7px}
+textarea{height:80px}
+#count{text-align:right;font-size:13px;color:#666}
+</style>
+</head>
+<body>
+<div id="stage">
+<svg viewBox="0 0 400 400" aria-label="Kreis">
+<rect width="400" height="400" fill="white"/>
+<path d="M190 40 A160 160 0 0 0 40 190 M40 210 A160 160 0 0 0 190 360 M210 360 A160 160 0 0 0 360 210 M360 190 A160 160 0 0 0 210 40" fill="none" stroke="#000" stroke-width="16"/>
+<circle cx="200" cy="200" r="72" fill="#000"/>
+</svg>
+<div id="cross"></div>
+<div id="hit"></div>
+</div>
+<div class="controls">
+<button id="center">Kreuz zentrieren</button>
+<button id="reset">Kreuz zurücksetzen</button>
+<label>Ball</label><input id="ball" type="text">
+<label>Bemerkung</label><textarea id="note" maxlength="200"></textarea>
+<div id="count">0 / 200</div>
+<button id="save">Bild speichern (PNG)</button>
+</div>
+<script>
+const stage=document.getElementById('stage'),cross=document.getElementById('cross'),hit=document.getElementById('hit');
+let x=.5,y=.5,drag=false;
+function setPos(nx,ny){x=Math.max(0,Math.min(1,nx));y=Math.max(0,Math.min(1,ny));cross.style.left=(x*100)+'%';cross.style.top=(y*100)+'%';hit.style.left=(x*100)+'%';hit.style.top=(y*100)+'%'}
+function point(e){const r=stage.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]}
+hit.addEventListener('pointerdown',e=>{drag=true;hit.setPointerCapture(e.pointerId);e.preventDefault()});
+hit.addEventListener('pointermove',e=>{if(!drag)return;const p=point(e);setPos(p[0],p[1]);e.preventDefault()});
+hit.addEventListener('pointerup',e=>{drag=false;try{hit.releasePointerCapture(e.pointerId)}catch(_){}});
+hit.addEventListener('pointercancel',()=>drag=false);
+document.getElementById('center').onclick=()=>setPos(.5,.5);
+document.getElementById('reset').onclick=()=>setPos(.5,.5);
+document.getElementById('note').oninput=e=>document.getElementById('count').textContent=e.target.value.length+' / 200';
+document.getElementById('save').onclick=()=>{
+ const c=document.createElement('canvas'),s=400;c.width=c.height=s;const ctx=c.getContext('2d');
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,s,s);ctx.strokeStyle='#000';ctx.lineWidth=16;
+ [[40,190,190,40],[40,210,190,360],[210,360,360,210],[360,190,210,40]].forEach(a=>{ctx.beginPath();ctx.arc(200,200,160,Math.atan2(a[1]-200,a[0]-200),Math.atan2(a[3]-200,a[2]-200),false);ctx.stroke()});
+ ctx.fillStyle='#000';ctx.beginPath();ctx.arc(200,200,72,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#e00000';const cx=x*s,cy=y*s;ctx.fillRect(cx-11,cy-2,22,4);ctx.fillRect(cx-2,cy-11,4,22);
+ const a=document.createElement('a');a.download='kreis-mit-kreuz.png';a.href=c.toDataURL('image/png');a.click();
+};
+setPos(.5,.5);
+</script>
+</body>
+</html>
